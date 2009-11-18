@@ -3,31 +3,37 @@
 #PyTe v2
 #Joshua Ashby
 #http://joshashby.com
+#joshuaashby@joshashby.com
 #2009
 #I hold no responsibility for anything that may happen to your 
 #computer if you use this program or any program written in it.
-#By Using PyTe you agree to the terms of use, gpl, gnu license, and
-#the Python, and Qt License's
+#By Using PyTe you agree to the Python, and Qt License's
 #All Trademarks Subject to their owners
 #Licensed under the Creative Commons v3 Non-Commercial License
 #===================================================
 #Ver .1 Beta
 #===================================================
-import sys
+import sys, os
+from PyQt4.QtCore import *
 from PyQt4 import QtCore, QtGui, Qsci
 from PyQt4.Qsci import QsciScintilla, QsciScintillaBase, QsciLexerPython, QsciLexerPerl, QsciLexerRuby, QsciLexerHTML, QsciLexerCSS, QsciLexerJavaScript, QsciLexerLua, QsciLexerPython, QsciLexerMakefile, QsciLexerCPP, QsciLexerBash, QsciLexerTeX, QsciLexerSQL
+from PyQt4.QtWebKit import *
 import ConfigParser
+
 editorList = []
 class MainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self, parent)
 
+        #window size, default title, and icon
         self.resize(640, 480)
         self.setWindowTitle('PyTe v2')
         self.setWindowIcon(QtGui.QIcon('icons/pyte.png'))
 
+        #sets up the Scintilla
         self.editor = Qsci.QsciScintilla()
 
+        #reads the config file to get the colors
         self.config = ConfigParser.ConfigParser()
         self.config.read('config.cfg')
         self.fontfam = self.config.get('Section1', 'fontf')
@@ -36,51 +42,51 @@ class MainWindow(QtGui.QMainWindow):
         self.lncolor = self.config.get('Section1', 'lncol')
         self.mfcolor = self.config.get('Section1', 'mfcol')
         self.mbcolor = self.config.get('Section1', 'mbcol')
+        self.webbar = self.config.get('Section1', 'webbar')
 
-        ## define the font to use
+        #define the font to use
         self.font = QtGui.QFont()
         self.font.setFamily(self.fontfam)
         self.font.setFixedPitch(True)
         self.font.setPointSize(10)
-        # the font metrics here will help
-        # building the margin width later
+        #the font metrics here will help
+        #building the margin width later
         self.fm = QtGui.QFontMetrics(self.font)
 
-        ## set the default font of the editor
-        ## and take the same font for line numbers
+        #set the default font of the editor
+        #and take the same font for line numbers
         self.editor.setFont(self.font)
         self.editor.setMarginsFont(self.font)
 
-        ## Line numbers
-        # conventionnaly, margin 0 is for line numbers
-        self.editor.setMarginWidth(0, self.fm.width( "00000" ) - 20)
+        #Line numbers
+        #conventionnaly, margin 0 is for line numbers
+        self.editor.setMarginWidth(0, self.fm.width( "0000" ))
         self.editor.setMarginLineNumbers(0, True)
 
-        ## Folding visual : we will use boxes
+        #Folding visual : we will use boxes
         self.editor.setFolding(QsciScintilla.BoxedTreeFoldStyle)
 
-        ## Braces matching
+        #Braces matching
         self.editor.setBraceMatching(QsciScintilla.SloppyBraceMatch)
 
-        ## Editing line color
+        #Editing line color
         self.editor.setCaretLineVisible(True)
         self.editor.setCaretLineBackgroundColor(QtGui.QColor(self.ecolor))
 
-        ## Margins colors
-        # line numbers margin
+        #Margins colors
+        #line numbers margin
         self.editor.setMarginsBackgroundColor(QtGui.QColor(self.mcolor))
         self.editor.setMarginsForegroundColor(QtGui.QColor(self.lncolor))
 
-        # folding margin colors (foreground,background)
+        #folding margin colors (foreground,background)
         self.editor.setFoldMarginColors(QtGui.QColor(self.mfcolor),QtGui.QColor(self.mbcolor))
 
-        ## Choose a lexer
+        #Choose a lexer
         lexer = QsciLexerPython()
         lexer.setDefaultFont(self.font)
         self.editor.setLexer(lexer)
 
-        self.setCentralWidget(self.editor)
-
+        #setup the different actions
         exit = QtGui.QAction(QtGui.QIcon('icons/exit.png'), 'Exit', self)
         exit.setShortcut('Ctrl+Q')
         exit.setStatusTip('Exit application')
@@ -199,6 +205,89 @@ class MainWindow(QtGui.QMainWindow):
         sql.setStatusTip('SQL Lexar')
         self.connect(sql, QtCore.SIGNAL('triggered()'), self.sql)
 
+        helpw = QtGui.QAction(QtGui.QIcon('icons/help.png'), 'Help', self)
+        helpw.setShortcut('Ctrl+H')
+        helpw.setStatusTip('Help')
+        self.connect(helpw, QtCore.SIGNAL('triggered()'), self.helpw)
+
+        backh = QtGui.QAction(QtGui.QIcon('icons/back.png'), 'Help Back', self)
+        backh.setStatusTip('Help Back')
+        self.connect(backh, QtCore.SIGNAL('triggered()'), self.backh)
+
+        nexth = QtGui.QAction(QtGui.QIcon('icons/next.png'), 'Help Forward', self)
+        nexth.setStatusTip('Help Forward')
+        self.connect(nexth, QtCore.SIGNAL('triggered()'), self.nexth)
+
+        backw = QtGui.QAction(QtGui.QIcon('icons/back.png'), 'Back', self)
+        backw.setStatusTip('Back')
+        self.connect(backw, QtCore.SIGNAL('triggered()'), self.backw)
+
+        nextw = QtGui.QAction(QtGui.QIcon('icons/next.png'), 'Forward', self)
+        nextw.setStatusTip('Forward')
+        self.connect(nextw, QtCore.SIGNAL('triggered()'), self.nextw)
+
+        self.progress = QtGui.QProgressBar()
+
+        self.help = QWebView()
+        __Dir = os.path.dirname(sys.argv[0])
+        self.doc = os.path.join(__Dir, 'doc/index.html')
+#debug        print self.doc
+        self.ur = "file://" + self.doc
+        QtCore.QObject.connect(self.help,QtCore.SIGNAL("linkClicked (const QUrl&)"), self.link_clicked)
+	self.help.setUrl(QtCore.QUrl(self.ur))
+
+        self.adress = QtGui.QLineEdit()
+
+        self.webbackb = QtGui.QPushButton(QtGui.QIcon('icons/back.png'),"")
+        self.connect(self.webbackb, QtCore.SIGNAL("clicked()"), self.backw)
+
+        self.webnextb = QtGui.QPushButton(QtGui.QIcon('icons/next.png'), "")
+        self.connect(self.webnextb, QtCore.SIGNAL("clicked()"), self.nextw)
+
+        self.buttonBox = QtGui.QHBoxLayout()
+        self.buttonBox.addWidget(self.webbackb)
+        self.buttonBox.addWidget(self.webnextb)
+        self.buttonBox.addWidget(self.adress)
+        self.buttonBox.addWidget(self.progress)
+
+        self.helpbackb = QtGui.QPushButton(QtGui.QIcon('icons/back.png'),"Back")
+        self.connect(self.helpbackb, QtCore.SIGNAL("clicked()"), self.backh)
+
+        self.helpnextb = QtGui.QPushButton(QtGui.QIcon('icons/next.png'), "Forward")
+        self.connect(self.helpnextb, QtCore.SIGNAL("clicked()"), self.nexth)
+
+        self.buttonBoxhelp = QtGui.QHBoxLayout()
+        self.buttonBoxhelp.addWidget(self.helpbackb)
+        self.buttonBoxhelp.addWidget(self.helpnextb)
+
+        self.web = QWebView()
+        self.urld = "http://google.com"
+        QtCore.QObject.connect(self.web,QtCore.SIGNAL("linkClicked (const QUrl&)"), self.link_clicked_web)
+        QtCore.QObject.connect(self.adress,QtCore.SIGNAL("returnPressed()"), self.url_changed)
+        QtCore.QObject.connect(self.web,QtCore.SIGNAL("loadProgress (int)"), self.load_progress)
+        self.adress.setText(self.urld)
+	self.web.setUrl(QtCore.QUrl(self.urld))
+
+        self.tab_widget = QtGui.QTabWidget() 
+        self.tab1 = QtGui.QWidget() 
+        self.tab2 = QtGui.QWidget()
+        self.tab3 = QtGui.QWidget()
+         
+        self.p1_vertical = QtGui.QVBoxLayout(self.tab1) 
+        self.p2_vertical = QtGui.QVBoxLayout(self.tab2) 
+        self.p3_vertical = QtGui.QVBoxLayout(self.tab3) 
+         
+        self.tab_widget.addTab(self.tab1, "Code Editor",) 
+        self.tab_widget.addTab(self.tab2, "Web Browser",) 
+
+        self.p1_vertical.addWidget(self.editor)
+        self.p2_vertical.addLayout(self.buttonBox)
+        self.p2_vertical.addWidget(self.web)
+        self.p3_vertical.addLayout(self.buttonBoxhelp)
+        self.p3_vertical.addWidget(self.help)
+
+        self.setCentralWidget(self.tab_widget)
+
         self.statusBar()
 
         menubar = self.menuBar()
@@ -214,18 +303,19 @@ class MainWindow(QtGui.QMainWindow):
         edit.addAction(copy)
         edit.addAction(paste)
         edit.addAction(cut)
+        edit.addAction(helpw)
         lex = menubar.addMenu('&Lexar')
+        lex.addAction(python)
         lex.addAction(perl)
         lex.addAction(ruby)
-        lex.addAction(html)
-        lex.addAction(css)
         lex.addAction(javascript)
         lex.addAction(lua)
-        lex.addAction(python)
+        lex.addAction(bash)
         lex.addAction(make)
         lex.addAction(cpp)
-        lex.addAction(bash)
         lex.addAction(tex)
+        lex.addAction(html)
+        lex.addAction(css)
         lex.addAction(sql)
         opt = menubar.addMenu('&Options')
         opt.addAction(sidebar)
@@ -233,7 +323,6 @@ class MainWindow(QtGui.QMainWindow):
         opt.addAction(mbcol)
         opt.addAction(mfcol)
         opt.addAction(ecol)
-
 
         toolbar = self.addToolBar('Exit')
         toolbar.addAction(new)
@@ -251,19 +340,20 @@ class MainWindow(QtGui.QMainWindow):
         toolbar.addAction(exit)
 
         toolbarlex = self.addToolBar('lex')
+        toolbarlex.addAction(python)
         toolbarlex.addAction(perl)
         toolbarlex.addAction(ruby)
-        toolbarlex.addAction(html)
-        toolbarlex.addAction(css)
         toolbarlex.addAction(javascript)
         toolbarlex.addAction(lua)
-        toolbarlex.addAction(python)
+        toolbarlex.addAction(bash)
         toolbarlex.addAction(make)
         toolbarlex.addAction(cpp)
-        toolbarlex.addAction(bash)
         toolbarlex.addAction(tex)
+        toolbarlex.addAction(html)
+        toolbarlex.addAction(css)
         toolbarlex.addAction(sql)
 
+        #if there is a argument passed then try to open it as a file
         if (len(sys.argv) > 1):
             fn = sys.argv[1]
 
@@ -279,6 +369,44 @@ class MainWindow(QtGui.QMainWindow):
 
         else:
             pass
+
+    #defines the different functions for the actions above
+    def load_progress(self, load):
+        self.progress.setValue(load)
+
+    def url_changed(self):
+        url = self.adress.text()
+        self.web.setUrl(QtCore.QUrl(url))
+
+    def backh(self):
+        page = self.help.page()
+        history = page.history()
+        history.back()
+
+    def nexth(self):
+        page = self.help.page()
+        history = page.history()
+        history.forward()
+
+    def backw(self):
+        page = self.web.page()
+        history = page.history()
+        history.back()
+
+    def nextw(self):
+        page = self.web.page()
+        history = page.history()
+        history.forward()
+
+    def helpw(self):
+        self.tab_widget.addTab(self.tab3, "Help")
+
+    def link_clicked(self, url):
+        self.help.setUrl(QtCore.QUrl(url))
+
+    def link_clicked_web(self, url):
+        self.web.setUrl(QtCore.QUrl(url))
+        self.adress.setText(url)
 
     def sidebar(self):
         col = QtGui.QColorDialog.getColor()
@@ -404,7 +532,7 @@ class MainWindow(QtGui.QMainWindow):
         f.write(str(self.editor.text()))
         f.close()
 
-
+#start the app
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     main = MainWindow()
