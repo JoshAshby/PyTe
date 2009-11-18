@@ -1,0 +1,2 @@
+You will need the PyQt4 packages: sudo apt-get install python-qt4
+and the python-qsintilla2 bindings to use PyTe: sudo apt-get install python-qscintills2
