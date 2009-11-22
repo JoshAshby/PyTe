@@ -11,6 +11,8 @@ web.py was a test that i was doing on building the web browser tabs. it is no lo
 
 config.cfg is the config file, it holds the color settings for the code editor
 
+PyTe.tar.gz is PyTe v1, this is a version written in PyQt3, and uses a lot more stuff. A few features from him have been carried over to the new PyTe v2, and a few features have been removed for the time being. Figured I throw it in here as I started development before I got on github, and never got a repo setup for it.
+
 #====================About===========================
 #PyTe v2
 #Joshua Ashby
