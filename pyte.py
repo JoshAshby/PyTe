@@ -11,7 +11,7 @@
 #All Trademarks Subject to their owners
 #Licensed under the Creative Commons v3 Non-Commercial License
 #===================================================
-#Ver .1 Beta
+#Ver .5 Beta
 #===================================================
 import sys, os
 from PyQt4.QtCore import *
@@ -24,16 +24,12 @@ editorList = []
 class MainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self, parent)
+        self.tab_widget = QtGui.QTabWidget()
 
-        #window size, default title, and icon
         self.resize(640, 480)
         self.setWindowTitle('PyTe v2')
         self.setWindowIcon(QtGui.QIcon('icons/pyte.png'))
 
-        #sets up the Scintilla
-        self.editor = Qsci.QsciScintilla()
-
-        #reads the config file to get the colors
         self.config = ConfigParser.ConfigParser()
         self.config.read('config.cfg')
         self.fontfam = self.config.get('Section1', 'fontf')
@@ -42,55 +38,55 @@ class MainWindow(QtGui.QMainWindow):
         self.lncolor = self.config.get('Section1', 'lncol')
         self.mfcolor = self.config.get('Section1', 'mfcol')
         self.mbcolor = self.config.get('Section1', 'mbcol')
-        self.webbar = self.config.get('Section1', 'webbar')
 
-        #define the font to use
         self.font = QtGui.QFont()
         self.font.setFamily(self.fontfam)
         self.font.setFixedPitch(True)
         self.font.setPointSize(10)
-        #the font metrics here will help
-        #building the margin width later
+
         self.fm = QtGui.QFontMetrics(self.font)
 
-        #set the default font of the editor
-        #and take the same font for line numbers
-        self.editor.setFont(self.font)
-        self.editor.setMarginsFont(self.font)
+        self.codelist = []
+        self.tablist =[]
+        self.plist = []
+        self.weblist = []
+        self.adresslist = []
+        self.webbblist = []
+        self.webnblist = []
+        self.webboxlist = []
+        self.progresslist = []
+        self.urllist = []
 
-        #Line numbers
-        #conventionnaly, margin 0 is for line numbers
-        self.editor.setMarginWidth(0, self.fm.width( "0000" ))
-        self.editor.setMarginLineNumbers(0, True)
+        self.code = len(self.codelist)
+        self.tab = len(self.tablist)
+        self.p = len(self.plist)
 
-        #Folding visual : we will use boxes
-        self.editor.setFolding(QsciScintilla.BoxedTreeFoldStyle)
-
-        #Braces matching
-        self.editor.setBraceMatching(QsciScintilla.SloppyBraceMatch)
-
-        #Editing line color
-        self.editor.setCaretLineVisible(True)
-        self.editor.setCaretLineBackgroundColor(QtGui.QColor(self.ecolor))
-
-        #Margins colors
-        #line numbers margin
-        self.editor.setMarginsBackgroundColor(QtGui.QColor(self.mcolor))
-        self.editor.setMarginsForegroundColor(QtGui.QColor(self.lncolor))
-
-        #folding margin colors (foreground,background)
-        self.editor.setFoldMarginColors(QtGui.QColor(self.mfcolor),QtGui.QColor(self.mbcolor))
-
-        #Choose a lexer
+        self.code = Qsci.QsciScintilla()
+        self.code.setFont(self.font)
+        self.code.setMarginsFont(self.font)
+        self.code.setMarginWidth(0, self.fm.width( "0000" ))
+        self.code.setMarginLineNumbers(0, True)
+        self.code.setFolding(QsciScintilla.BoxedTreeFoldStyle)
+        self.code.setBraceMatching(QsciScintilla.SloppyBraceMatch)
+        self.code.setCaretLineVisible(True)
+        self.code.setCaretLineBackgroundColor(QtGui.QColor(self.ecolor))
+        self.code.setMarginsBackgroundColor(QtGui.QColor(self.mcolor))
+        self.code.setMarginsForegroundColor(QtGui.QColor(self.lncolor))
+        self.code.setFoldMarginColors(QtGui.QColor(self.mfcolor),QtGui.QColor(self.mbcolor))
         lexer = QsciLexerPython()
-        lexer.setDefaultFont(self.font)
-        self.editor.setLexer(lexer)
+        self.code.setLexer(lexer)
+
+        self.editor = self.code
 
         #setup the different actions
-        exit = QtGui.QAction(QtGui.QIcon('icons/exit.png'), 'Exit', self)
-        exit.setShortcut('Ctrl+Q')
-        exit.setStatusTip('Exit application')
-        self.connect(exit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
+        quit = QtGui.QAction(QtGui.QIcon('icons/exit.png'), 'Exit', self)
+        quit.setShortcut('Ctrl+Q')
+        quit.setStatusTip('Exit')
+        self.connect(quit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
+
+        exit = QtGui.QAction(QtGui.QIcon('icons/exit.png'), 'Close Tab', self)
+        exit.setStatusTip('Close Tab')
+        self.connect(exit, QtCore.SIGNAL('triggered()'), self.closetab)
 
         new = QtGui.QAction(QtGui.QIcon('icons/new.png'), 'New', self)
         new.setShortcut('Ctrl+N')
@@ -133,7 +129,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(paste, QtCore.SIGNAL('triggered()'), self.editor.paste)
 
         cut = QtGui.QAction(QtGui.QIcon('icons/cut.png'), 'Cut', self)
-        cut.setShortcut('Ctrl+Shft+C')
+        cut.setShortcut('Ctrl+Shift+C')
         cut.setStatusTip('Cut')
         self.connect(cut, QtCore.SIGNAL('triggered()'), self.editor.cut)
 
@@ -205,18 +201,14 @@ class MainWindow(QtGui.QMainWindow):
         sql.setStatusTip('SQL Lexar')
         self.connect(sql, QtCore.SIGNAL('triggered()'), self.sql)
 
-        helpw = QtGui.QAction(QtGui.QIcon('icons/help.png'), 'Help', self)
-        helpw.setShortcut('Ctrl+H')
-        helpw.setStatusTip('Help')
-        self.connect(helpw, QtCore.SIGNAL('triggered()'), self.helpw)
+        newtab = QtGui.QAction(QtGui.QIcon('icons/add.png'), 'Add Tab', self)
+        newtab.setStatusTip('Add Tab')
+        newtab.connect(newtab,QtCore.SIGNAL('triggered()'), self.codetab)
 
-        backh = QtGui.QAction(QtGui.QIcon('icons/back.png'), 'Help Back', self)
-        backh.setStatusTip('Help Back')
-        self.connect(backh, QtCore.SIGNAL('triggered()'), self.backh)
-
-        nexth = QtGui.QAction(QtGui.QIcon('icons/next.png'), 'Help Forward', self)
-        nexth.setStatusTip('Help Forward')
-        self.connect(nexth, QtCore.SIGNAL('triggered()'), self.nexth)
+        newweb = QtGui.QAction(QtGui.QIcon('icons/new.png'), 'New Web', self)
+        newweb.setShortcut('Ctrl+Shift+N')
+        newweb.setStatusTip('New Web')
+        self.connect(newweb, QtCore.SIGNAL('triggered()'), self.newweb)
 
         backw = QtGui.QAction(QtGui.QIcon('icons/back.png'), 'Back', self)
         backw.setStatusTip('Back')
@@ -226,65 +218,68 @@ class MainWindow(QtGui.QMainWindow):
         nextw.setStatusTip('Forward')
         self.connect(nextw, QtCore.SIGNAL('triggered()'), self.nextw)
 
-        self.progress = QtGui.QProgressBar()
+        self.tab_widget = QtGui.QTabWidget()
+        self.tab = QtGui.QWidget()
+        self.p = QtGui.QVBoxLayout(self.tab)
+        self.tab_widget.addTab(self.tab, QtGui.QIcon('icons/tex.png'), "Code Editor")
+        self.p.addWidget(self.code)
 
-        self.help = QWebView()
-        __Dir = os.path.dirname(sys.argv[0])
-        self.doc = os.path.join(__Dir, 'doc/index.html')
-#debug        print self.doc
-        self.ur = "file://" + self.doc
-        QtCore.QObject.connect(self.help,QtCore.SIGNAL("linkClicked (const QUrl&)"), self.link_clicked)
-	self.help.setUrl(QtCore.QUrl(self.ur))
+        self.codelist.append(self.code)
+        self.tablist.append(self.tab)
+        self.plist.append(self.p)
 
+        self.tab = len(self.tablist)
+        self.p = len(self.plist)
+
+        self.adress = len(self.adresslist)
         self.adress = QtGui.QLineEdit()
+        self.adresslist.append(self.adress)
 
+        self.webbackb = len(self.webbblist)
         self.webbackb = QtGui.QPushButton(QtGui.QIcon('icons/back.png'),"")
-        self.connect(self.webbackb, QtCore.SIGNAL("clicked()"), self.backw)
+        self.webbblist.append(self.webbackb)
 
+        self.webnextb = len(self.webnblist)
         self.webnextb = QtGui.QPushButton(QtGui.QIcon('icons/next.png'), "")
+        self.webnblist.append(self.webnextb)
+
+        self.buttonBox = len(self.webboxlist)
+        self.buttonBox = QtGui.QHBoxLayout()
+        self.webboxlist.append(self.buttonBox)
+
+        self.progress = len(self.progresslist)
+        self.progress = QtGui.QProgressBar()
+        self.progresslist.append(self.progress)
+
+        self.web = len(self.weblist)
+        self.web = QWebView()
+        self.weblist.append(self.web)
+
+        self.connect(self.webbackb, QtCore.SIGNAL("clicked()"), self.backw)
         self.connect(self.webnextb, QtCore.SIGNAL("clicked()"), self.nextw)
 
-        self.buttonBox = QtGui.QHBoxLayout()
         self.buttonBox.addWidget(self.webbackb)
         self.buttonBox.addWidget(self.webnextb)
         self.buttonBox.addWidget(self.adress)
         self.buttonBox.addWidget(self.progress)
 
-        self.helpbackb = QtGui.QPushButton(QtGui.QIcon('icons/back.png'),"Back")
-        self.connect(self.helpbackb, QtCore.SIGNAL("clicked()"), self.backh)
-
-        self.helpnextb = QtGui.QPushButton(QtGui.QIcon('icons/next.png'), "Forward")
-        self.connect(self.helpnextb, QtCore.SIGNAL("clicked()"), self.nexth)
-
-        self.buttonBoxhelp = QtGui.QHBoxLayout()
-        self.buttonBoxhelp.addWidget(self.helpbackb)
-        self.buttonBoxhelp.addWidget(self.helpnextb)
-
-        self.web = QWebView()
+        self.urld = len(self.urllist)
         self.urld = "http://google.com"
+        self.urllist.append(self.urld)
         QtCore.QObject.connect(self.web,QtCore.SIGNAL("linkClicked (const QUrl&)"), self.link_clicked_web)
         QtCore.QObject.connect(self.adress,QtCore.SIGNAL("returnPressed()"), self.url_changed)
         QtCore.QObject.connect(self.web,QtCore.SIGNAL("loadProgress (int)"), self.load_progress)
         self.adress.setText(self.urld)
 	self.web.setUrl(QtCore.QUrl(self.urld))
 
-        self.tab_widget = QtGui.QTabWidget() 
-        self.tab1 = QtGui.QWidget() 
-        self.tab2 = QtGui.QWidget()
-        self.tab3 = QtGui.QWidget()
-         
-        self.p1_vertical = QtGui.QVBoxLayout(self.tab1) 
-        self.p2_vertical = QtGui.QVBoxLayout(self.tab2) 
-        self.p3_vertical = QtGui.QVBoxLayout(self.tab3) 
-         
-        self.tab_widget.addTab(self.tab1, "Code Editor",) 
-        self.tab_widget.addTab(self.tab2, "Web Browser",) 
+        self.tab = QtGui.QWidget()
+        self.p = QtGui.QVBoxLayout(self.tab)
+        self.tab_widget.addTab(self.tab, QtGui.QIcon('icons/tex.png'), "Web")
+        self.p.addLayout(self.buttonBox)
+        self.p.addWidget(self.web)
 
-        self.p1_vertical.addWidget(self.editor)
-        self.p2_vertical.addLayout(self.buttonBox)
-        self.p2_vertical.addWidget(self.web)
-        self.p3_vertical.addLayout(self.buttonBoxhelp)
-        self.p3_vertical.addWidget(self.help)
+        self.tablist.append(self.tab)
+        self.plist.append(self.p)
 
         self.setCentralWidget(self.tab_widget)
 
@@ -295,7 +290,10 @@ class MainWindow(QtGui.QMainWindow):
         file.addAction(new)
         file.addAction(openf)
         file.addAction(saveas)
+        file.addAction(newtab)
+        file.addAction(newweb)
         file.addAction(exit)
+        file.addAction(quit)
         edit = menubar.addMenu('&Edit')
         edit.addAction(undo)
         edit.addAction(redo)
@@ -303,7 +301,6 @@ class MainWindow(QtGui.QMainWindow):
         edit.addAction(copy)
         edit.addAction(paste)
         edit.addAction(cut)
-        edit.addAction(helpw)
         lex = menubar.addMenu('&Lexar')
         lex.addAction(python)
         lex.addAction(perl)
@@ -326,6 +323,11 @@ class MainWindow(QtGui.QMainWindow):
 
         toolbar = self.addToolBar('Exit')
         toolbar.addAction(new)
+        toolbar.addSeparator()
+        toolbar.addAction(exit)
+        toolbar.addAction(newtab)
+        toolbar.addAction(newweb)
+        toolbar.addSeparator()
         toolbar.addAction(openf)
         toolbar.addAction(saveas)
         toolbar.addSeparator()
@@ -336,8 +338,6 @@ class MainWindow(QtGui.QMainWindow):
         toolbar.addAction(copy)
         toolbar.addAction(paste)
         toolbar.addAction(cut)
-        toolbar.addSeparator()
-        toolbar.addAction(exit)
 
         toolbarlex = self.addToolBar('lex')
         toolbarlex.addAction(python)
@@ -370,45 +370,284 @@ class MainWindow(QtGui.QMainWindow):
         else:
             pass
 
+#debug        print self.weblist
+#debug        print self.progresslist
+
     #defines the different functions for the actions above
+    def newweb(self):
+        self.adress = len(self.adresslist)
+        self.adress = QtGui.QLineEdit()
+        self.adresslist.append(self.adress)
+
+        self.webbackb = len(self.webbblist)
+        self.webbackb = QtGui.QPushButton(QtGui.QIcon('icons/back.png'),"")
+        self.webbblist.append(self.webbackb)
+
+        self.webnextb = len(self.webnblist)
+        self.webnextb = QtGui.QPushButton(QtGui.QIcon('icons/next.png'), "")
+        self.webnblist.append(self.webnextb)
+
+        self.buttonBox = len(self.webboxlist)
+        self.buttonBox = QtGui.QHBoxLayout()
+        self.webboxlist.append(self.buttonBox)
+
+        self.progress = len(self.progresslist)
+        self.progress = QtGui.QProgressBar()
+        self.progresslist.append(self.progress)
+
+        self.web = len(self.weblist)
+        self.web = QWebView()
+        self.weblist.append(self.web)
+
+        self.connect(self.webbackb, QtCore.SIGNAL("clicked()"), self.backw)
+        self.connect(self.webnextb, QtCore.SIGNAL("clicked()"), self.nextw)
+
+        self.buttonBox.addWidget(self.webbackb)
+        self.buttonBox.addWidget(self.webnextb)
+        self.buttonBox.addWidget(self.adress)
+        self.buttonBox.addWidget(self.progress)
+
+        self.urld = len(self.urllist)
+        self.urld = "http://google.com"
+        self.urllist.append(self.urld)
+        QtCore.QObject.connect(self.web,QtCore.SIGNAL("linkClicked (const QUrl&)"), self.link_clicked_web)
+        QtCore.QObject.connect(self.adress,QtCore.SIGNAL("returnPressed()"), self.url_changed)
+        QtCore.QObject.connect(self.web,QtCore.SIGNAL("loadProgress (int)"), self.load_progress)
+        self.adress.setText(self.urld)
+	self.web.setUrl(QtCore.QUrl(self.urld))
+
+        self.tab = QtGui.QWidget()
+        self.p = QtGui.QVBoxLayout(self.tab)
+        self.tab_widget.addTab(self.tab, QtGui.QIcon('icons/tex.png'), "Web")
+        self.p.addLayout(self.buttonBox)
+        self.p.addWidget(self.web)
+
+        self.tablist.append(self.tab)
+        self.plist.append(self.p)
+
     def load_progress(self, load):
+        self.webli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.webli-1)
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.webli)
+            if (self.num == "Web"):
+                try:
+                    self.progress = self.progresslist[self.webli]
+                except:
+                    self.progress = self.progresslist[self.webli-1]
+            else:
+                return
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.webli)
+            if (self.num == "Web"):
+                try:
+                    self.web = self.weblist[self.webli-1]
+                    self.adress = self.adresslist[self.webli-1]
+                except:
+                    self.web = self.weblist[self.webli]
+                    self.adress = self.adresslist[self.webli]
+            else:
+                return
+        if (self.numb == ""):
+            self.progress = self.progresslist[self.webli]
+#debug        print self.webli
+#        self.progress = self.progresslist[self.webli]
+#debug        print self.progress
         self.progress.setValue(load)
 
     def url_changed(self):
+        self.webli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.webli-1)
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.webli)
+            if (self.num == "Web"):
+                try:
+                    self.web = self.weblist[self.webli]
+                    self.adress = self.adresslist[self.webli]
+                except:
+                    self.web = self.weblist[self.webli-1]
+                    self.adress = self.adresslist[self.webli-1]
+            else:
+                return
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.webli)
+            if (self.num == "Web"):
+                try:
+                    self.web = self.weblist[self.webli-1]
+                    self.adress = self.adresslist[self.webli-1]
+                except:
+                    self.web = self.weblist[self.webli]
+                    self.adress = self.adresslist[self.webli]
+            else:
+                return
+        if (self.numb == ""):
+            self.adress = self.adresslist[self.webli]
+            self.web = self.weblist[self.webli]
         url = self.adress.text()
         self.web.setUrl(QtCore.QUrl(url))
 
-    def backh(self):
-        page = self.help.page()
-        history = page.history()
-        history.back()
-
-    def nexth(self):
-        page = self.help.page()
-        history = page.history()
-        history.forward()
-
     def backw(self):
+        self.webli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.webli-1)
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.webli)
+            if (self.num == "Web"):
+                try:
+                    self.web = self.weblist[self.webli]
+                except:
+                    self.web = self.weblist[self.webli-1]
+            else:
+                return
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.webli)
+            if (self.num == "Web"):
+                try:
+                    self.web = self.weblist[self.webli-1]
+                    self.adress = self.adresslist[self.webli-1]
+                except:
+                    self.web = self.weblist[self.webli]
+                    self.adress = self.adresslist[self.webli]
+            else:
+                return
+        if (self.numb == ""):
+            self.web = self.weblist[self.webli]
         page = self.web.page()
         history = page.history()
         history.back()
 
     def nextw(self):
+        self.webli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.webli-1)
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.webli)
+            if (self.num == "Web"):
+                try:
+                    self.web = self.weblist[self.webli]
+                except:
+                    self.web = self.weblist[self.webli-1]
+            else:
+                return
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.webli)
+            if (self.num == "Web"):
+                try:
+                    self.web = self.weblist[self.webli-1]
+                    self.adress = self.adresslist[self.webli-1]
+                except:
+                    self.web = self.weblist[self.webli]
+                    self.adress = self.adresslist[self.webli]
+            else:
+                return
+        if (self.numb == ""):
+            self.web = self.weblist[self.webli]
         page = self.web.page()
         history = page.history()
         history.forward()
 
-    def helpw(self):
-        self.tab_widget.addTab(self.tab3, "Help")
-
-    def link_clicked(self, url):
-        self.help.setUrl(QtCore.QUrl(url))
-
     def link_clicked_web(self, url):
+        self.webli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.webli-1)
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.webli)
+            if (self.num == "Web"):
+                try:
+                    self.web = self.weblist[self.webli]
+                    self.adress = self.adresslist[self.webli]
+                except:
+                    self.web = self.weblist[self.webli-1]
+                    self.adress = self.adresslist[self.webli-1]
+            else:
+                return
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.webli)
+            if (self.num == "Web"):
+                try:
+                    self.web = self.weblist[self.webli-1]
+                    self.adress = self.adresslist[self.webli-1]
+                except:
+                    self.web = self.weblist[self.webli]
+                    self.adress = self.adresslist[self.webli]
+            else:
+                return
+        if (self.numb == ""):
+            self.web = self.weblist[self.webli]
+            self.adress = self.adresslist[self.webli]
         self.web.setUrl(QtCore.QUrl(url))
         self.adress.setText(url)
 
+    def closetab(self):
+        self.codeli = self.tab_widget.currentIndex()
+#debug        print self.codeli
+        if (self.codeli == -1):
+            self.codetab()
+        else:
+            self.tab_widget.removeTab(self.codeli)
+
+            self.max = self.codeli + 1
+
+#            self.codelist[self.codeli:self.max] = []
+#            self.tablist[self.codeli:self.max] = []
+#            self.plist[self.codeli:self.max] = []
+#            self.weblist[self.codeli:self.max] = []
+#            self.adresslist[self.codeli:self.max] = []
+#            self.webbblist[self.codeli:self.max] = []
+#            self.webnblist[self.codeli:self.max] = []
+#            self.webboxlist[self.codeli:self.max] = []
+#            self.progresslist[self.codeli:self.max] = []
+#            self.urllist[self.codeli:self.max] = []
+
+    def codetab(self):
+        self.code = Qsci.QsciScintilla()
+        self.code.setFont(self.font)
+        self.code.setMarginsFont(self.font)
+        self.code.setMarginWidth(0, self.fm.width( "0000" ))
+        self.code.setMarginLineNumbers(0, True)
+        self.code.setFolding(QsciScintilla.BoxedTreeFoldStyle)
+        self.code.setBraceMatching(QsciScintilla.SloppyBraceMatch)
+        self.code.setCaretLineVisible(True)
+        self.code.setCaretLineBackgroundColor(QtGui.QColor(self.ecolor))
+        self.code.setMarginsBackgroundColor(QtGui.QColor(self.mcolor))
+        self.code.setMarginsForegroundColor(QtGui.QColor(self.lncolor))
+        self.code.setFoldMarginColors(QtGui.QColor(self.mfcolor),QtGui.QColor(self.mbcolor))
+        lexer = QsciLexerPython()
+        self.code.setLexer(lexer)
+
+        self.tab = QtGui.QWidget()
+        self.p = QtGui.QVBoxLayout(self.tab)
+        self.tab_widget.addTab(self.tab, QtGui.QIcon('icons/tex.png'), "Code Editor")
+        self.p.addWidget(self.code)
+
+        self.codelist.append(self.code)
+        self.tablist.append(self.tab)
+        self.plist.append(self.p)
+
     def sidebar(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         col = QtGui.QColorDialog.getColor()
 
         if col.isValid():
@@ -418,6 +657,32 @@ class MainWindow(QtGui.QMainWindow):
                  self.config.write(configfile)
 
     def textcol(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         col = QtGui.QColorDialog.getColor()
 
         if col.isValid():
@@ -427,6 +692,32 @@ class MainWindow(QtGui.QMainWindow):
                  self.config.write(configfile)
 
     def mfcol(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         col = QtGui.QColorDialog.getColor()
 
         if col.isValid():
@@ -436,6 +727,32 @@ class MainWindow(QtGui.QMainWindow):
                  self.config.write(configfile)
 
     def mbcol(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         col = QtGui.QColorDialog.getColor()
 
         if col.isValid():
@@ -445,6 +762,32 @@ class MainWindow(QtGui.QMainWindow):
                  self.config.write(configfile)
 
     def ecol(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         col = QtGui.QColorDialog.getColor()
 
         if col.isValid():
@@ -454,50 +797,362 @@ class MainWindow(QtGui.QMainWindow):
                  self.config.write(configfile)
 
     def perl(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         lexer = QsciLexerPerl()
         self.editor.setLexer(lexer)
 
     def ruby(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         lexer = QsciLexerRuby()
         self.editor.setLexer(lexer)
 
     def html(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         lexer = QsciLexerHTML()
         self.editor.setLexer(lexer)
 
     def css(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         lexer = QsciLexerCSS()
         self.editor.setLexer(lexer)
 
     def javascript(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         lexer = QsciLexerJavaScript()
         self.editor.setLexer(lexer)
 
     def lua(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         lexer = QsciLexerLua()
         self.editor.setLexer(lexer)
 
     def python(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         lexer = QsciLexerPython()
         self.editor.setLexer(lexer)
 
     def make(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         lexer = QsciLexerMakefile()
         self.editor.setLexer(lexer)
 
     def cpp(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         lexer = QsciLexerCPP()
         self.editor.setLexer(lexer)
 
     def bash(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         lexer = QsciLexerBash()
         self.editor.setLexer(lexer)
 
     def tex(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         lexer = QsciLexerTeX()
         self.editor.setLexer(lexer)
 
     def sql(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
         lexer = QsciLexerSQL()
         self.editor.setLexer(lexer)
 
@@ -507,6 +1162,33 @@ class MainWindow(QtGui.QMainWindow):
         editorList.append(main)
 
     def openfile(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
+
         fn = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '/home', '')
 
         if fn.isEmpty():
@@ -523,6 +1205,33 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle(fileName+" - PyTe v2")
 
     def saveAs(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
+
         fn = QtGui.QFileDialog.getSaveFileName(self, 'Save File', '')
         try:
             f = open(str(fn),'w+r')
