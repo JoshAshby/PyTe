@@ -468,7 +468,7 @@ class MainWindow(QtGui.QMainWindow):
             self.num = self.tab_widget.tabText(self.webli)
             if (self.num == "Web"):
                 self.web = self.weblist[self.webli]
-                self.adress = self.adresslist[self.webli-1]
+                self.adress = self.adresslist[self.webli]
             else:
                 return
         if (self.numb == ""):
@@ -492,7 +492,7 @@ class MainWindow(QtGui.QMainWindow):
         if (self.numb == "Code Editor"):
             self.num = self.tab_widget.tabText(self.webli)
             if (self.num == "Web"):
-                self.web = self.weblist[self.webli-1]
+                self.web = self.weblist[self.webli]
             else:
                 return
         if (self.numb == ""):
@@ -516,7 +516,7 @@ class MainWindow(QtGui.QMainWindow):
         if (self.numb == "Code Editor"):
             self.num = self.tab_widget.tabText(self.webli)
             if (self.num == "Web"):
-                self.web = self.weblist[self.webli-1]
+                self.web = self.weblist[self.webli]
             else:
                 return
         if (self.numb == ""):
@@ -542,8 +542,8 @@ class MainWindow(QtGui.QMainWindow):
         if (self.numb == "Code Editor"):
             self.num = self.tab_widget.tabText(self.webli)
             if (self.num == "Web"):
-                self.web = self.weblist[self.webli-1]
-                self.adress = self.adresslist[self.webli-1]
+                self.web = self.weblist[self.webli]
+                self.adress = self.adresslist[self.webli]
             else:
                 return
         if (self.numb == ""):

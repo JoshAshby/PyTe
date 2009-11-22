@@ -1,2 +1,12 @@
 You will need the PyQt4 packages: sudo apt-get install python-qt4
-and the python-qsintilla2 bindings to use PyTe
+and the python-qsintilla2 bindings to use PyTe: sudo apt-get install python-qscintills2
+
+pyte.py is the main app, simply navigate to the folder containing pyte.py in a terminal and run either
+./pyte.py
+or
+python pyte.py
+both should work fine.
+
+web.py was a test that i was doing on building the web browser tabs. it is no longer needed or used.
+
+config.cfg is the config file, it holds the color settings for the code editor
