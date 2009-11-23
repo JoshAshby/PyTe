@@ -19,7 +19,7 @@
 #All Trademarks Subject to their owners
 #Licensed under the Creative Commons v3 Non-Commercial License
 #===================================================
-#Ver .7 Beta
+#Ver .8.5 Beta
 #===================================================
 import sys, os
 from PyQt4.QtCore import *
@@ -33,13 +33,17 @@ class MainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self, parent)
         self.tab_widget = QtGui.QTabWidget()
+        self.__Dir = os.path.dirname(sys.argv[0])
+#debug        print __Dir
+        self.icons =  os.path.join(self.__Dir, 'icons/')
 
         self.resize(640, 480)
         self.setWindowTitle('PyTe v2')
-        self.setWindowIcon(QtGui.QIcon('icons/pyte.png'))
+        self.setWindowIcon(QtGui.QIcon(self.icons+'pyte.png'))
 
         self.config = ConfigParser.ConfigParser()
-        self.config.read('config.cfg')
+        self.configfile =  os.path.join(self.__Dir, 'config.cfg')
+        self.config.read(self.configfile)
         self.fontfam = self.config.get('Section1', 'fontf')
         self.ecolor = self.config.get('Section1', 'ecol')
         self.mcolor = self.config.get('Section1', 'mcol')
@@ -87,149 +91,149 @@ class MainWindow(QtGui.QMainWindow):
         self.editor = self.code
 
         #setup the different actions
-        quit = QtGui.QAction(QtGui.QIcon('icons/exit.png'), 'Exit', self)
+        quit = QtGui.QAction(QtGui.QIcon(self.icons+'exit.png'), 'Exit', self)
         quit.setShortcut('Ctrl+Q')
         quit.setStatusTip('Exit')
         self.connect(quit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
 
-        exit = QtGui.QAction(QtGui.QIcon('icons/exit.png'), 'Close Tab', self)
+        exit = QtGui.QAction(QtGui.QIcon(self.icons+'exit.png'), 'Close Tab', self)
         exit.setStatusTip('Close Tab')
         self.connect(exit, QtCore.SIGNAL('triggered()'), self.closetab)
 
-        new = QtGui.QAction(QtGui.QIcon('icons/new.png'), 'New', self)
+        new = QtGui.QAction(QtGui.QIcon(self.icons+'new.png'), 'New', self)
         new.setShortcut('Ctrl+N')
         new.setStatusTip('New')
         self.connect(new, QtCore.SIGNAL('triggered()'), self.new)
 
-        openf = QtGui.QAction(QtGui.QIcon('icons/open.png'), 'Open', self)
+        openf = QtGui.QAction(QtGui.QIcon(self.icons+'open.png'), 'Open', self)
         openf.setShortcut('Ctrl+O')
         openf.setStatusTip('Open')
         self.connect(openf, QtCore.SIGNAL('triggered()'), self.openfile)
 
-        saveas = QtGui.QAction(QtGui.QIcon('icons/save.png'), 'Save As', self)
+        saveas = QtGui.QAction(QtGui.QIcon(self.icons+'save.png'), 'Save As', self)
         saveas.setShortcut('Ctrl+Shft+S')
         saveas.setStatusTip('Save As')
         self.connect(saveas, QtCore.SIGNAL('triggered()'), self.saveAs)
 
-        undo = QtGui.QAction(QtGui.QIcon('icons/undo.png'), 'Undo', self)
+        undo = QtGui.QAction(QtGui.QIcon(self.icons+'undo.png'), 'Undo', self)
         undo.setShortcut('Ctrl+Z')
         undo.setStatusTip('Undo')
         self.connect(undo, QtCore.SIGNAL('triggered()'), self.editor.undo)
 
-        redo = QtGui.QAction(QtGui.QIcon('icons/redo.png'), 'Redo', self)
+        redo = QtGui.QAction(QtGui.QIcon(self.icons+'redo.png'), 'Redo', self)
         redo.setShortcut('Ctrl+Y')
         redo.setStatusTip('Redo')
         self.connect(redo, QtCore.SIGNAL('triggered()'), self.editor.redo)
 
-        selectall = QtGui.QAction(QtGui.QIcon('icons/selectall.png'), 'Select All', self)
+        selectall = QtGui.QAction(QtGui.QIcon(self.icons+'selectall.png'), 'Select All', self)
         selectall.setShortcut('Ctrl+A')
         selectall.setStatusTip('Select All')
         self.connect(selectall, QtCore.SIGNAL('triggered()'), self.editor.selectAll)
 
-        copy = QtGui.QAction(QtGui.QIcon('icons/copy.png'), 'Copy', self)
+        copy = QtGui.QAction(QtGui.QIcon(self.icons+'copy.png'), 'Copy', self)
         copy.setShortcut('Ctrl+C')
         copy.setStatusTip('Copy')
         self.connect(copy, QtCore.SIGNAL('triggered()'), self.editor.copy)
 
-        paste = QtGui.QAction(QtGui.QIcon('icons/paste.png'), 'Paste', self)
+        paste = QtGui.QAction(QtGui.QIcon(self.icons+'paste.png'), 'Paste', self)
         paste.setShortcut('Ctrl+P')
         paste.setStatusTip('Paste')
         self.connect(paste, QtCore.SIGNAL('triggered()'), self.editor.paste)
 
-        cut = QtGui.QAction(QtGui.QIcon('icons/cut.png'), 'Cut', self)
+        cut = QtGui.QAction(QtGui.QIcon(self.icons+'cut.png'), 'Cut', self)
         cut.setShortcut('Ctrl+Shift+C')
         cut.setStatusTip('Cut')
         self.connect(cut, QtCore.SIGNAL('triggered()'), self.editor.cut)
 
-        sidebar = QtGui.QAction(QtGui.QIcon('icons/sidebar.png'), 'Sidebar Color', self)
+        sidebar = QtGui.QAction(QtGui.QIcon(self.icons+'sidebar.png'), 'Sidebar Color', self)
         sidebar.setStatusTip('Sidebar Color')
         self.connect(sidebar, QtCore.SIGNAL('triggered()'), self.sidebar)
 
-        textcol = QtGui.QAction(QtGui.QIcon('icons/textcol.png'), 'Line # Color', self)
+        textcol = QtGui.QAction(QtGui.QIcon(self.icons+'textcol.png'), 'Line # Color', self)
         textcol.setStatusTip('Line # Color')
         self.connect(textcol, QtCore.SIGNAL('triggered()'), self.textcol)
 
-        mbcol = QtGui.QAction(QtGui.QIcon('icons/mbcol.png'), 'Margin Background Color', self)
+        mbcol = QtGui.QAction(QtGui.QIcon(self.icons+'mbcol.png'), 'Margin Background Color', self)
         mbcol.setStatusTip('Margin Background Color')
         self.connect(mbcol, QtCore.SIGNAL('triggered()'), self.mbcol)
 
-        mfcol = QtGui.QAction(QtGui.QIcon('icons/mfcol.png'), 'Margin Forground Color', self)
+        mfcol = QtGui.QAction(QtGui.QIcon(self.icons+'mfcol.png'), 'Margin Forground Color', self)
         mfcol.setStatusTip('Margin Foreground Color')
         self.connect(mfcol, QtCore.SIGNAL('triggered()'), self.mfcol)
 
-        ecol = QtGui.QAction(QtGui.QIcon('icons/ecol.png'), 'Edit line # Color', self)
+        ecol = QtGui.QAction(QtGui.QIcon(self.icons+'ecol.png'), 'Edit line # Color', self)
         ecol.setStatusTip('Edit line # Color')
         self.connect(ecol, QtCore.SIGNAL('triggered()'), self.ecol)
 
-        perl = QtGui.QAction(QtGui.QIcon('icons/perl.png'), 'Perl', self)
+        perl = QtGui.QAction(QtGui.QIcon(self.icons+'perl.png'), 'Perl', self)
         perl.setStatusTip('Perl Lexar')
         self.connect(perl, QtCore.SIGNAL('triggered()'), self.perl)
 
-        ruby = QtGui.QAction(QtGui.QIcon('icons/ruby.png'), 'Ruby', self)
+        ruby = QtGui.QAction(QtGui.QIcon(self.icons+'ruby.png'), 'Ruby', self)
         ruby.setStatusTip('Ruby Lexar')
         self.connect(ruby, QtCore.SIGNAL('triggered()'), self.ruby)
 
-        html = QtGui.QAction(QtGui.QIcon('icons/html.png'), 'HTML', self)
+        html = QtGui.QAction(QtGui.QIcon(self.icons+'html.png'), 'HTML', self)
         html.setStatusTip('HTML Lexar')
         self.connect(html, QtCore.SIGNAL('triggered()'), self.html)
 
-        css = QtGui.QAction(QtGui.QIcon('icons/css.png'), 'CSS', self)
+        css = QtGui.QAction(QtGui.QIcon(self.icons+'css.png'), 'CSS', self)
         css.setStatusTip('CSS Lexar')
         self.connect(css, QtCore.SIGNAL('triggered()'), self.css)
 
-        javascript = QtGui.QAction(QtGui.QIcon('icons/javascript.png'), 'Javascript', self)
+        javascript = QtGui.QAction(QtGui.QIcon(self.icons+'javascript.png'), 'Javascript', self)
         javascript.setStatusTip('Javascript Lexar')
         self.connect(javascript, QtCore.SIGNAL('triggered()'), self.javascript)
 
-        lua = QtGui.QAction(QtGui.QIcon('icons/lua.png'), 'Lua', self)
+        lua = QtGui.QAction(QtGui.QIcon(self.icons+'lua.png'), 'Lua', self)
         lua.setStatusTip('Lua Lexar')
         self.connect(lua, QtCore.SIGNAL('triggered()'), self.lua)
 
-        python = QtGui.QAction(QtGui.QIcon('icons/python.png'), 'Python', self)
+        python = QtGui.QAction(QtGui.QIcon(self.icons+'python.png'), 'Python', self)
         python.setStatusTip('Python Lexar')
         self.connect(python, QtCore.SIGNAL('triggered()'), self.python)
 
-        make = QtGui.QAction(QtGui.QIcon('icons/makefile.png'), 'Make', self)
+        make = QtGui.QAction(QtGui.QIcon(self.icons+'makefile.png'), 'Make', self)
         make.setStatusTip('Make Lexar')
         self.connect(make, QtCore.SIGNAL('triggered()'), self.make)
 
-        cpp = QtGui.QAction(QtGui.QIcon('icons/cpp.png'), 'CPP', self)
+        cpp = QtGui.QAction(QtGui.QIcon(self.icons+'cpp.png'), 'CPP', self)
         cpp.setStatusTip('CPP Lexar')
         self.connect(cpp, QtCore.SIGNAL('triggered()'), self.cpp)
 
-        bash = QtGui.QAction(QtGui.QIcon('icons/bash.png'), 'Bash', self)
+        bash = QtGui.QAction(QtGui.QIcon(self.icons+'bash.png'), 'Bash', self)
         bash.setStatusTip('Bash Lexar')
         self.connect(bash, QtCore.SIGNAL('triggered()'), self.bash)
 
-        tex = QtGui.QAction(QtGui.QIcon('icons/tex.png'), 'TeX', self)
+        tex = QtGui.QAction(QtGui.QIcon(self.icons+'tex.png'), 'TeX', self)
         tex.setStatusTip('TeX Lexar')
         self.connect(tex, QtCore.SIGNAL('triggered()'), self.tex)
 
-        sql = QtGui.QAction(QtGui.QIcon('icons/sql.png'), 'SQL', self)
+        sql = QtGui.QAction(QtGui.QIcon(self.icons+'sql.png'), 'SQL', self)
         sql.setStatusTip('SQL Lexar')
         self.connect(sql, QtCore.SIGNAL('triggered()'), self.sql)
 
-        newtab = QtGui.QAction(QtGui.QIcon('icons/add.png'), 'Add Tab', self)
+        newtab = QtGui.QAction(QtGui.QIcon(self.icons+'add.png'), 'Add Tab', self)
         newtab.setStatusTip('Add Tab')
         newtab.connect(newtab,QtCore.SIGNAL('triggered()'), self.codetab)
 
-        newweb = QtGui.QAction(QtGui.QIcon('icons/new.png'), 'New Web', self)
+        newweb = QtGui.QAction(QtGui.QIcon(self.icons+'new.png'), 'New Web', self)
         newweb.setShortcut('Ctrl+Shift+N')
         newweb.setStatusTip('New Web')
         self.connect(newweb, QtCore.SIGNAL('triggered()'), self.newweb)
 
-        backw = QtGui.QAction(QtGui.QIcon('icons/back.png'), 'Back', self)
+        backw = QtGui.QAction(QtGui.QIcon(self.icons+'back.png'), 'Back', self)
         backw.setStatusTip('Back')
         self.connect(backw, QtCore.SIGNAL('triggered()'), self.backw)
 
-        nextw = QtGui.QAction(QtGui.QIcon('icons/next.png'), 'Forward', self)
+        nextw = QtGui.QAction(QtGui.QIcon(self.icons+'next.png'), 'Forward', self)
         nextw.setStatusTip('Forward')
         self.connect(nextw, QtCore.SIGNAL('triggered()'), self.nextw)
 
         self.tab_widget = QtGui.QTabWidget()
         self.tab = QtGui.QWidget()
         self.p = QtGui.QVBoxLayout(self.tab)
-        self.tab_widget.addTab(self.tab, QtGui.QIcon('icons/tex.png'), "Code Editor")
+        self.tab_widget.addTab(self.tab, QtGui.QIcon(self.icons+'tex.png'), "Code Editor")
         self.p.addWidget(self.code)
 
         self.codelist.append(self.code)
@@ -244,11 +248,11 @@ class MainWindow(QtGui.QMainWindow):
         self.adresslist.append(self.adress)
 
         self.webbackb = len(self.webbblist)
-        self.webbackb = QtGui.QPushButton(QtGui.QIcon('icons/back.png'),"")
+        self.webbackb = QtGui.QPushButton(QtGui.QIcon(self.icons+'back.png'),"")
         self.webbblist.append(self.webbackb)
 
         self.webnextb = len(self.webnblist)
-        self.webnextb = QtGui.QPushButton(QtGui.QIcon('icons/next.png'), "")
+        self.webnextb = QtGui.QPushButton(QtGui.QIcon(self.icons+'next.png'), "")
         self.webnblist.append(self.webnextb)
 
         self.buttonBox = len(self.webboxlist)
@@ -282,7 +286,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.tab = QtGui.QWidget()
         self.p = QtGui.QVBoxLayout(self.tab)
-        self.tab_widget.addTab(self.tab, QtGui.QIcon('icons/tex.png'), "Web")
+        self.tab_widget.addTab(self.tab, QtGui.QIcon(self.icons+'web.png'), "Web")
         self.p.addLayout(self.buttonBox)
         self.p.addWidget(self.web)
 
@@ -390,11 +394,11 @@ class MainWindow(QtGui.QMainWindow):
         self.adresslist.append(self.adress)
 
         self.webbackb = len(self.webbblist)
-        self.webbackb = QtGui.QPushButton(QtGui.QIcon('icons/back.png'),"")
+        self.webbackb = QtGui.QPushButton(QtGui.QIcon(self.icons+'back.png'),"")
         self.webbblist.append(self.webbackb)
 
         self.webnextb = len(self.webnblist)
-        self.webnextb = QtGui.QPushButton(QtGui.QIcon('icons/next.png'), "")
+        self.webnextb = QtGui.QPushButton(QtGui.QIcon(self.icons+'next.png'), "")
         self.webnblist.append(self.webnextb)
 
         self.buttonBox = len(self.webboxlist)
@@ -428,7 +432,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.tab = QtGui.QWidget()
         self.p = QtGui.QVBoxLayout(self.tab)
-        self.tab_widget.addTab(self.tab, QtGui.QIcon('icons/tex.png'), "Web")
+        self.tab_widget.addTab(self.tab, QtGui.QIcon(self.icons+'web.png'), "Web")
         self.p.addLayout(self.buttonBox)
         self.p.addWidget(self.web)
 
@@ -601,7 +605,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.tab = QtGui.QWidget()
         self.p = QtGui.QVBoxLayout(self.tab)
-        self.tab_widget.addTab(self.tab, QtGui.QIcon('icons/tex.png'), "Code Editor")
+        self.tab_widget.addTab(self.tab, QtGui.QIcon(self.icons+'tex.png'), "Code Editor")
         self.p.addWidget(self.code)
 
         self.codelist.append(self.code)
