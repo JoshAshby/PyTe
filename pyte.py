@@ -5,13 +5,21 @@
 #http://joshashby.com
 #joshuaashby@joshashby.com
 #2009
+#
+#PyTe, or Python Text Editor as he started off being named, is
+#a semi advanced code editor that i have been writting for the
+#past several years. He uses the PyQt4 gui library, and is meant
+#to be somewhat stand alone.
+#he includes a qtwebkit web browser as i have found having a
+#browser and a code editor in the same window to be helpful
+#
 #I hold no responsibility for anything that may happen to your 
 #computer if you use this program or any program written in it.
 #By Using PyTe you agree to the Python, and Qt License's
 #All Trademarks Subject to their owners
 #Licensed under the Creative Commons v3 Non-Commercial License
 #===================================================
-#Ver .5 Beta
+#Ver .7 Beta
 #===================================================
 import sys, os
 from PyQt4.QtCore import *
@@ -284,6 +292,8 @@ class MainWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.tab_widget)
 
         self.statusBar()
+
+        self.filename = ""
 
         menubar = self.menuBar()
         file = menubar.addMenu('&File')
@@ -1166,20 +1176,20 @@ class MainWindow(QtGui.QMainWindow):
             self.editor = self.codelist[self.codeli]
 #debug            print self.editor
 
-        fn = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '/home', '')
+        self.fn = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '/home', '')
 
-        if fn.isEmpty():
+        if self.fn.isEmpty():
             return
 
-        fileName = str(fn)
+        self.fileName = str(self.fn)
 
         try:
-            f = open(fileName,'r').read()
-            self.editor.setText(f)
+            self.f = open(self.fileName,'r').read()
+            self.editor.setText(self.f)
         except:
             return
 
-        self.setWindowTitle(fileName+" - PyTe v2")
+        self.setWindowTitle(self.fileName+" - PyTe v2")
 
     def saveAs(self):
         self.codeli = self.tab_widget.currentIndex()
@@ -1209,14 +1219,64 @@ class MainWindow(QtGui.QMainWindow):
             self.editor = self.codelist[self.codeli]
 #debug            print self.editor
 
-        fn = QtGui.QFileDialog.getSaveFileName(self, 'Save File', '')
+        self.fn = QtGui.QFileDialog.getSaveFileName(self, 'Save File', '')
         try:
-            f = open(str(fn),'w+r')
+            self.f = open(str(self.fn),'w+r')
         except:
             return
 
-        f.write(str(self.editor.text()))
-        f.close()
+        self.f.write(str(self.editor.text()))
+        self.f.close()
+
+    def closeEvent(self, event):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
+#debug        print self.editor.isModified()
+        if (self.editor.isModified() == True):
+            if (self.filename == ""):
+                ret = QtGui.QMessageBox.warning(self, "PyTe",
+                            "The Code has been modified.\n"
+                            "Do you want to save your changes?",
+                            QtGui.QMessageBox.Save | QtGui.QMessageBox.Discard |
+                            QtGui.QMessageBox.Cancel)
+                if ret == QtGui.QMessageBox.Save:
+                    self.fn = QtGui.QFileDialog.getSaveFileName(self, 'Save File', '')
+                    try:
+                       self.f = open(str(self.fn),'w+r')
+                    except:
+                       return
+
+                    self.f.write(str(self.editor.text()))
+                    self.f.close()
+                    event.accept()
+                elif ret == QtGui.QMessageBox.Cancel:
+                    event.ignore()
+        else:
+            event.accept()
 
 #start the app
 if __name__ == "__main__":
