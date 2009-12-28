@@ -27,6 +27,7 @@ from PyQt4 import QtCore, QtGui, Qsci
 from PyQt4.Qsci import QsciScintilla, QsciScintillaBase, QsciLexerPython, QsciLexerPerl, QsciLexerRuby, QsciLexerHTML, QsciLexerCSS, QsciLexerJavaScript, QsciLexerLua, QsciLexerPython, QsciLexerMakefile, QsciLexerCPP, QsciLexerBash, QsciLexerTeX, QsciLexerSQL
 from PyQt4.QtWebKit import *
 import ConfigParser
+import keyboard
 
 editorList = []
 class MainWindow(QtGui.QMainWindow):
@@ -99,6 +100,11 @@ class MainWindow(QtGui.QMainWindow):
         exit = QtGui.QAction(QtGui.QIcon(self.icons+'exit.png'), 'Close Tab', self)
         exit.setStatusTip('Close Tab')
         self.connect(exit, QtCore.SIGNAL('triggered()'), self.closetab)
+
+        key = QtGui.QAction(QtGui.QIcon(self.icons+'key.png'), 'Keyboard', self)
+        key.setShortcut('Ctrl+K')
+        key.setStatusTip('Keyboard')
+        self.connect(key, QtCore.SIGNAL('triggered()'), self.keyboard)
 
         new = QtGui.QAction(QtGui.QIcon(self.icons+'new.png'), 'New', self)
         new.setShortcut('Ctrl+N')
@@ -302,6 +308,7 @@ class MainWindow(QtGui.QMainWindow):
         menubar = self.menuBar()
         file = menubar.addMenu('&File')
         file.addAction(new)
+        file.addAction(key)
         file.addAction(openf)
         file.addAction(saveas)
         file.addAction(newtab)
@@ -1281,6 +1288,37 @@ class MainWindow(QtGui.QMainWindow):
                     event.ignore()
         else:
             event.accept()
+
+    def keyboard(self):
+        self.codeli = self.tab_widget.currentIndex()
+        self.numb = self.tab_widget.tabText(self.codeli-1)
+#debug        print self.codeli
+#debug        print self.numb
+#debug        print self.tablist
+#debug        print self.codelist
+        if (self.numb == "Web"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                try:
+                    self.editor = self.codelist[self.codeli-1]
+                except:
+                    self.editor = self.codelist[self.codeli-2]
+#debug            print self.editor
+        if (self.numb == "Code Editor"):
+            self.num = self.tab_widget.tabText(self.codeli)
+            if (self.num == "Web"):
+                return
+            else:
+                self.editor = self.codelist[self.codeli-1]
+#debug            print self.editor
+        if (self.numb == ""):
+            self.editor = self.codelist[self.codeli]
+#debug            print self.editor
+        userinput = keyboard.key()
+#debug        print userinput
+        self.editor.insert(userinput)
 
 #start the app
 if __name__ == "__main__":
