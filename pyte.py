@@ -314,14 +314,7 @@ class MainWindow(QtGui.QMainWindow):
             pass
 
     def closetab(self):
-        self.codeli = self.tab_widget.currentIndex()
-#debug        print self.codeli
-        if (self.codeli == -1):
-            self.codetab()
-        else:
-            self.tab_widget.removeTab(self.codeli)
-
-            self.max = self.codeli + 1
+        self.tab_widget.removeTab(self.tab_widget.currentIndex())
 
     def codetab(self):
         self.code = Qsci.QsciScintilla()
@@ -349,8 +342,7 @@ class MainWindow(QtGui.QMainWindow):
         self.plist.append(self.p)
 
     def sidebar(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         col = QtGui.QColorDialog.getColor()
 
         if col.isValid():
@@ -360,8 +352,7 @@ class MainWindow(QtGui.QMainWindow):
                  self.config.write(configfile)
 
     def textcol(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         col = QtGui.QColorDialog.getColor()
 
         if col.isValid():
@@ -371,8 +362,7 @@ class MainWindow(QtGui.QMainWindow):
                  self.config.write(configfile)
 
     def mfcol(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         col = QtGui.QColorDialog.getColor()
 
         if col.isValid():
@@ -382,8 +372,7 @@ class MainWindow(QtGui.QMainWindow):
                  self.config.write(configfile)
 
     def mbcol(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         col = QtGui.QColorDialog.getColor()
 
         if col.isValid():
@@ -393,8 +382,7 @@ class MainWindow(QtGui.QMainWindow):
                  self.config.write(configfile)
 
     def ecol(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         col = QtGui.QColorDialog.getColor()
 
         if col.isValid():
@@ -404,74 +392,62 @@ class MainWindow(QtGui.QMainWindow):
                  self.config.write(configfile)
 
     def perl(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         lexer = QsciLexerPerl()
         self.editor.setLexer(lexer)
 
     def ruby(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         lexer = QsciLexerRuby()
         self.editor.setLexer(lexer)
 
     def html(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         lexer = QsciLexerHTML()
         self.editor.setLexer(lexer)
 
     def css(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         lexer = QsciLexerCSS()
         self.editor.setLexer(lexer)
 
     def javascript(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         lexer = QsciLexerJavaScript()
         self.editor.setLexer(lexer)
 
     def lua(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         lexer = QsciLexerLua()
         self.editor.setLexer(lexer)
 
     def python(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         lexer = QsciLexerPython()
         self.editor.setLexer(lexer)
 
     def make(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         lexer = QsciLexerMakefile()
         self.editor.setLexer(lexer)
 
     def cpp(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         lexer = QsciLexerCPP()
         self.editor.setLexer(lexer)
 
     def bash(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         lexer = QsciLexerBash()
         self.editor.setLexer(lexer)
 
     def tex(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         lexer = QsciLexerTeX()
         self.editor.setLexer(lexer)
 
     def sql(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         lexer = QsciLexerSQL()
         self.editor.setLexer(lexer)
 
@@ -481,8 +457,7 @@ class MainWindow(QtGui.QMainWindow):
         editorList.append(main)
 
     def openfile(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
 
         self.fn = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '/home', '')
 
@@ -500,8 +475,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle(self.fileName+" - PyTe v2")
 
     def saveAs(self):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
 
         self.fn = QtGui.QFileDialog.getSaveFileName(self, 'Save File', '')
         try:
@@ -513,8 +487,7 @@ class MainWindow(QtGui.QMainWindow):
         self.f.close()
 
     def closeEvent(self, event):
-        self.codeli = self.tab_widget.currentIndex()
-        self.numb = self.tab_widget.tabText(self.codeli-1)
+        self.editor = self.codelist[self.tab_widget.currentIndex()]
         if (self.editor.isModified() == True):
             if (self.filename == ""):
                 ret = QtGui.QMessageBox.warning(self, "PyTe",
