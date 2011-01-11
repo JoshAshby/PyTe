@@ -7,8 +7,6 @@ or
 python pyte.py
 both should work fine.
 
-web.py was a test that i was doing on building the web browser tabs. it is no longer needed or used.
-
 config.cfg is the config file, it holds the color settings for the code editor
 
 PyTe.tar.gz is PyTe v1, this is a version written in PyQt3, and uses a lot more stuff. A few features from him have been carried over to the new PyTe v2, and a few features have been removed for the time being. Figured I throw it in here as I started development before I got on github, and never got a repo setup for it.
@@ -18,7 +16,7 @@ PyTe.tar.gz is PyTe v1, this is a version written in PyQt3, and uses a lot more 
 #Joshua Ashby
 #http://joshashby.com
 #joshuaashby@joshashby.com
-#2009
+#2011
 #
 #PyTe, or Python Text Editor as he started off being named, is
 #a semi advanced code editor that i have been writting for the
@@ -33,5 +31,5 @@ PyTe.tar.gz is PyTe v1, this is a version written in PyQt3, and uses a lot more 
 #All Trademarks Subject to their owners
 #Licensed under the Creative Commons v3 Non-Commercial License
 #===================================================
-#Ver .8.5 Beta
+#Ver .9 Alpha
 #===================================================
