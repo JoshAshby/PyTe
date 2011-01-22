@@ -17,6 +17,8 @@ from PyQt4 import QtCore, QtGui, Qsci
 from PyQt4.Qsci import QsciScintilla, QsciScintillaBase, QsciLexerPython
 from editor import editor
 
+debug = 0
+
 class MainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self, parent)
@@ -33,9 +35,7 @@ class MainWindow(QtGui.QMainWindow):
         self.mainTabWidget.setMovable(True)
         self.setCentralWidget(self.mainTabWidget)
 
-        newEditor = editor(self, self)
-        newTab = self.mainTabWidget.addTab(newEditor, QtGui.QIcon(self.icons+'pyte.png'), "Pyte v3")
-        self.mainTabWidget.setCurrentIndex(newTab)
+        self.codetab()
 
         self.statusBar()
 
@@ -47,55 +47,54 @@ class MainWindow(QtGui.QMainWindow):
         newtab.setStatusTip('Add Tab')
         self.connect(newtab,QtCore.SIGNAL('triggered()'), self.codetab)
 
-        self.connect(self.mainTabWidget, QtCore.SIGNAL("tabCloseRequested (int)"), self.on_close_tab_requested)
-        self.connect(self.mainTabWidget, QtCore.SIGNAL("currentChanged (int)"), self.on_tab_change)
+        self.connect(self.mainTabWidget, QtCore.SIGNAL("tabCloseRequested (int)"), self.tabClose)
+        self.connect(self.mainTabWidget, QtCore.SIGNAL("currentChanged (int)"), self.tabChange)
 
         menubar = self.menuBar()
         file = menubar.addMenu('&File')
         file.addAction(newtab)
         file.addAction(closeTab)
 
-        #if there is a argument passed then try to open it as a file
-        if (len(sys.argv) > 1):
-            fn = sys.argv[1]
-
-            fileName = str(fn)
-
-            try:
-                self.editor.openArg(fileName)
-                self.editor.title(fileName)
-            except:
-                return
-
-            self.setWindowTitle(fileName+" - PyTe v3")
-        else:
-            pass
+        timer = QtCore.QTimer(self)
+        QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), self.tabUpdate)
+        timer.start(1000)
 
     def closetab(self):
         self.mainTabWidget.removeTab(self.mainTabWidget.currentIndex())
+        self.getObject(self.mainTabWidget, "")
 
     def codetab(self):
         newEditor = editor(self, self)
         newTab = self.mainTabWidget.addTab(newEditor, QtGui.QIcon(self.icons+'tex.png'), "Code Editor")
         self.mainTabWidget.setCurrentIndex(newTab)
-        self.printChildren(self.mainTabWidget, "")
+        self.getObject(self.mainTabWidget, "")
 
-    def printChildren(self, obj, indent):
+    def tabClose(self, tabIndex):
+        self.mainTabWidget.removeTab(tabIndex)
+        self.getObject(self.mainTabWidget, "")
+
+    def tabChange(self, index):
+        self.getObject(self.mainTabWidget, "")
+
+    def tabUpdate(self):
+        self.getObject(self.mainTabWidget, "")
+        if debug==1:
+           print self.windowTitle()
+
+    def getObject(self, obj, indent):
         children=obj.children()
         if children==None:
            return
         for child in children:
            if (child.__class__ == editor):
+                if debug==1:
+                   print child
                 if (child.getTitle() == ''):
                    self.setWindowTitle("PyTe v3")
                 else:
                    self.setWindowTitle(child.getTitle()+" - PyTe v3")
-
-    def on_close_tab_requested(self, tabIndex):
-        self.mainTabWidget.removeTab(tabIndex)
-
-    def on_tab_change(self, index):
-        self.printChildren(self.mainTabWidget, "")
+           else:
+                self.getObject(child, indent + "  ")
 
 #start the app
 if __name__ == "__main__":
