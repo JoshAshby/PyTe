@@ -3,6 +3,7 @@ import sys, os
 from PyQt4.QtCore import *
 from PyQt4 import QtCore, QtGui, Qsci
 from PyQt4.Qsci import QsciScintilla, QsciScintillaBase, QsciLexerPython, QsciLexerPerl, QsciLexerRuby, QsciLexerHTML, QsciLexerCSS, QsciLexerJavaScript, QsciLexerLua, QsciLexerPython, QsciLexerMakefile, QsciLexerCPP, QsciLexerBash, QsciLexerTeX, QsciLexerSQL
+import ConfigParser
 
 class editor(QtGui.QWidget):
    def __init__(self, parent, main):
@@ -20,8 +21,18 @@ class editor(QtGui.QWidget):
 
        self.editor = QsciScintilla(self)
 
+       self.config = ConfigParser.ConfigParser()
+       self.configfile =  os.path.join(self.__Dir, 'config.cfg')
+       self.config.read(self.configfile)
+       self.fontfam = self.config.get('Section1', 'fontf')
+       self.ecolor = self.config.get('Section1', 'ecol')
+       self.mcolor = self.config.get('Section1', 'mcol')
+       self.lncolor = self.config.get('Section1', 'lncol')
+       self.mfcolor = self.config.get('Section1', 'mfcol')
+       self.mbcolor = self.config.get('Section1', 'mbcol')
+
        self.font = QtGui.QFont()
-       self.font.setFamily("Consolas")
+       self.font.setFamily(self.fontfam)
        self.font.setFixedPitch(True)
        self.font.setPointSize(10)
        self.fm = QtGui.QFontMetrics(self.font)
@@ -34,10 +45,10 @@ class editor(QtGui.QWidget):
        self.editor.setFolding(QsciScintilla.BoxedTreeFoldStyle)
        self.editor.setBraceMatching(QsciScintilla.SloppyBraceMatch)
        self.editor.setCaretLineVisible(True)
-       self.editor.setCaretLineBackgroundColor(QtGui.QColor('#bfbfbf'))
-       self.editor.setMarginsBackgroundColor(QtGui.QColor('#3e3e3e'))
-       self.editor.setMarginsForegroundColor(QtGui.QColor('#aaff00'))
-       self.editor.setFoldMarginColors(QtGui.QColor('#ff0000'),QtGui.QColor('#000000'))
+       self.editor.setCaretLineBackgroundColor(QtGui.QColor(self.ecolor))
+       self.editor.setMarginsBackgroundColor(QtGui.QColor(self.mcolor))
+       self.editor.setMarginsForegroundColor(QtGui.QColor(self.lncolor))
+       self.editor.setFoldMarginColors(QtGui.QColor(self.mfcolor),QtGui.QColor(self.mbcolor))
 
        #setup the lexer dictionary. This makes setting the lexer easy when a file is loaded
        self.lexer = {'.py': QsciLexerPython(), '.c': QsciLexerCPP(), '.rb': QsciLexerRuby(), '.sh': QsciLexerBash(), '': QsciLexerMakefile(), '.sql': QsciLexerSQL(), '.cpp': QsciLexerCPP(), '.h': QsciLexerCPP(), '.pl': QsciLexerPerl(),

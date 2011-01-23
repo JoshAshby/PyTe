@@ -116,6 +116,7 @@ class MainWindow(QtGui.QMainWindow):
         edit = menubar.addMenu('&Edit')
         edit.addAction(undoTab)
         edit.addAction(redoTab)
+        edit.addSeparator()
         edit.addAction(copyTab)
         edit.addAction(pasteTab)
         edit.addAction(cutTab)
@@ -127,10 +128,10 @@ class MainWindow(QtGui.QMainWindow):
         toolbar.addSeparator()
         toolbar.addAction(openTab)
         toolbar.addAction(saveTab)
-        toolbar.addAction(saveAsTab)
         toolbar.addSeparator()
         toolbar.addAction(undoTab)
         toolbar.addAction(redoTab)
+        toolbar.addSeparator()
         toolbar.addAction(copyTab)
         toolbar.addAction(pasteTab)
         toolbar.addAction(cutTab)
@@ -235,7 +236,7 @@ class MainWindow(QtGui.QMainWindow):
                       if (child.getTitle() == ''):
                          self.setWindowTitle("PyTe v3")
                       else:
-                         self.setWindowTitle(child.getTitle()+" - PyTe v3")
+                         self.setWindowTitle(child.getFile()+" - ["+child.getTitle()+"]"+" - PyTe v3")
                          self.mainTabWidget.setTabText(self.mainTabWidget.currentIndex(),child.getFile())
                          self.mainTabWidget.setTabIcon(self.mainTabWidget.currentIndex(),QtGui.QIcon(self.icons+self.lexerPic[child.getFileType()]))
                    else:
