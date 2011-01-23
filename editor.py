@@ -39,7 +39,8 @@ class editor(QtGui.QWidget):
        self.editor.setFont(self.font)
        self.editor.setMarginsFont(self.font)
        self.editor.setMarginWidth(0, self.fm.width( "0000" ))
-
+       self.editor.setAutoCompletionSource(QsciScintilla.AcsAll)
+       self.editor.setAutoIndent(True)
        self.editor.setMarginLineNumbers(0, True)
        self.editor.setUtf8(True)
        self.editor.setFolding(QsciScintilla.BoxedTreeFoldStyle)
