@@ -2,7 +2,7 @@
 import sys, os
 from PyQt4.QtCore import *
 from PyQt4 import QtCore, QtGui, Qsci
-from PyQt4.Qsci import QsciScintilla, QsciScintillaBase, QsciLexerPython, QsciLexerPerl, QsciLexerRuby, QsciLexerHTML, QsciLexerCSS, QsciLexerJavaScript, QsciLexerLua, QsciLexerPython, QsciLexerMakefile, QsciLexerCPP, QsciLexerBash, QsciLexerTeX, QsciLexerSQL
+from PyQt4.Qsci import QsciScintilla, QsciScintillaBase, QsciLexerPython, QsciLexerPerl, QsciLexerRuby, QsciLexerHTML, QsciLexerCSS, QsciLexerJavaScript, QsciLexerLua, QsciLexerPython, QsciLexerMakefile, QsciLexerCPP, QsciLexerBash, QsciLexerTeX, QsciLexerSQL, QsciLexerXML
 import ConfigParser
 
 class editor(QtGui.QWidget):
@@ -52,20 +52,20 @@ class editor(QtGui.QWidget):
 
        #setup the lexer dictionary. This makes setting the lexer easy when a file is loaded
        self.lexer = {'.py': QsciLexerPython(), '.c': QsciLexerCPP(), '.rb': QsciLexerRuby(), '.sh': QsciLexerBash(), '': QsciLexerMakefile(), '.sql': QsciLexerSQL(), '.cpp': QsciLexerCPP(), '.h': QsciLexerCPP(), '.pl': QsciLexerPerl(),
-'.html': QsciLexerHTML(),'.css': QsciLexerCSS(),'.js': QsciLexerJavaScript(),'.lua': QsciLexerLua(),'.tex': QsciLexerTeX(), '.txt': QsciLexerTeX()}
+'.html': QsciLexerHTML(),'.css': QsciLexerCSS(),'.js': QsciLexerJavaScript(),'.lua': QsciLexerLua(),'.tex': QsciLexerTeX(), '.txt': QsciLexerTeX(), '.cfg': QsciLexerTeX(), '.php': QsciLexerHTML(), '.xml': QsciLexerXML()}
        self.editor.setLexer(self.lexer['.py'])
+
+       self.filetypes = '*.py *.c *.rb *.sh *.sql *.cpp *.h *.pl *.html *.css *.js *.lua *.tex *.txt *.cfg *.php *.xml'
 
        fileBox = QtGui.QHBoxLayout()
        mainLayout.addLayout(fileBox, 0)
-
-
 
        mainLayout.addWidget(self.editor, 200)
 
        self.CurrentfileName = ''
 
    def openFile(self):
-      self.fn = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '/home', '')
+      self.fn = QtGui.QFileDialog.getOpenFileName(self, 'Open file', self.filetypes)
       if self.fn.isEmpty():
           return
       self.fileName = str(self.fn)
@@ -73,7 +73,7 @@ class editor(QtGui.QWidget):
           self.f = open(self.fileName,'r').read()
           self.editor.setText(self.f)
       except:
-          return
+          return 0
       self.CurrentfileName = self.fileName
       self.extension = os.path.splitext(self.fileName)[1]
       self.editor.setLexer(self.lexer[self.extension])
@@ -86,14 +86,15 @@ class editor(QtGui.QWidget):
       self.editor.setLexer(self.lexer[self.extension])
 
    def saveAs(self):
-      self.fn = QtGui.QFileDialog.getSaveFileName(self, 'Save File', '')
+      self.fn = QtGui.QFileDialog.getSaveFileName(self, 'Save File', '' , self.filetypes)
       self.CurrentfileName = self.fn
       try:
           self.f = open(str(self.fn),'w+r')
       except:
-          return
+          return 0
       self.f.write(str(self.editor.text()))
       self.f.close()
+      return 1
 
    def getTitle(self):
       return self.CurrentfileName
@@ -128,9 +129,10 @@ class editor(QtGui.QWidget):
       try:
           self.f = open(self.CurrentfileName,'w+r')
       except:
-          return
+          return 0
       self.f.write(str(self.editor.text()))
       self.f.close()
+      return 1
 
    def closeEvent(self):
       if (self.editor.isModified() == True):
@@ -141,22 +143,9 @@ class editor(QtGui.QWidget):
                           QtGui.QMessageBox.Cancel)
           if ret == QtGui.QMessageBox.Save:
               if self.CurrentfileName=="":
-                 self.fn = QtGui.QFileDialog.getSaveFileName(self, 'Save File', '')
-                 try:
-                     self.f = open(str(self.fn),'w+r')
-                 except:
-                     return 0
-                 self.f.write(str(self.editor.text()))
-                 self.f.close()
-                 return 1
+                 return self.saveAs()
               else:
-                 try:
-                     self.f = open(self.CurrentfileName,'w+r')
-                 except:
-                     return 0
-                 self.f.write(str(self.editor.text()))
-                 self.f.close()
-                 return 1
+                 return self.save()
           elif ret == QtGui.QMessageBox.Cancel:
               return 0
           elif ret == QtGui.QMessageBox.Discard:
