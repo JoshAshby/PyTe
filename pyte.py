@@ -28,6 +28,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle('PyTe v3')
         self.setWindowIcon(QtGui.QIcon(self.icons+'pyte.png'))
 
+        self.lexerPic = {'.py': 'python.png', '.c': 'c.png', '.rb': 'ruby.png', '.sh': 'bash.png', '': 'makefile.png', '.sql': 'sql.png', '.cpp': 'cpp.png', '.h': 'h.png', '.pl': 'perl.png','.html': 'html.png','.css': 'css.png','.js': 'javascript.png','.lua': 'lua.png','.tex': 'tex.png'}
 
         self.mainTabWidget = QtGui.QTabWidget(self)
         self.mainTabWidget.setTabsClosable(True)
@@ -68,6 +69,36 @@ class MainWindow(QtGui.QMainWindow):
         saveAsTab.setStatusTip('Save As')
         self.connect(saveAsTab,QtCore.SIGNAL('triggered()'), self.saveAs)
 
+        undoTab = QtGui.QAction(QtGui.QIcon(self.icons+'undo.png'), 'Undo', self)
+        undoTab.setShortcut('Ctrl+Z')
+        undoTab.setStatusTip('Undo')
+        self.connect(undoTab, QtCore.SIGNAL('triggered()'), self.undo)
+
+        redoTab = QtGui.QAction(QtGui.QIcon(self.icons+'redo.png'), 'Redo', self)
+        redoTab.setShortcut('Ctrl+Y')
+        redoTab.setStatusTip('Redo')
+        self.connect(redoTab, QtCore.SIGNAL('triggered()'), self.redo)
+
+        selectallTab = QtGui.QAction(QtGui.QIcon(self.icons+'selectall.png'), 'Select All', self)
+        selectallTab.setShortcut('Ctrl+A')
+        selectallTab.setStatusTip('Select All')
+        self.connect(selectallTab, QtCore.SIGNAL('triggered()'), self.selectAll)
+
+        copyTab = QtGui.QAction(QtGui.QIcon(self.icons+'copy.png'), 'Copy', self)
+        copyTab.setShortcut('Ctrl+C')
+        copyTab.setStatusTip('Copy')
+        self.connect(copyTab, QtCore.SIGNAL('triggered()'), self.copy)
+
+        pasteTab = QtGui.QAction(QtGui.QIcon(self.icons+'paste.png'), 'Paste', self)
+        pasteTab.setShortcut('Ctrl+P')
+        pasteTab.setStatusTip('Paste')
+        self.connect(pasteTab, QtCore.SIGNAL('triggered()'), self.paste)
+
+        cutTab = QtGui.QAction(QtGui.QIcon(self.icons+'cut.png'), 'Cut', self)
+        cutTab.setShortcut('Ctrl+Shift+C')
+        cutTab.setStatusTip('Cut')
+        self.connect(cutTab, QtCore.SIGNAL('triggered()'), self.cut)
+
         self.connect(self.mainTabWidget, QtCore.SIGNAL("tabCloseRequested (int)"), self.tabClose)
         self.connect(self.mainTabWidget, QtCore.SIGNAL("currentChanged (int)"), self.tabChange)
 
@@ -82,6 +113,14 @@ class MainWindow(QtGui.QMainWindow):
         file.addSeparator()
         file.addAction(quit)
 
+        edit = menubar.addMenu('&Edit')
+        edit.addAction(undoTab)
+        edit.addAction(redoTab)
+        edit.addAction(copyTab)
+        edit.addAction(pasteTab)
+        edit.addAction(cutTab)
+        edit.addAction(selectallTab)
+
         toolbar = self.addToolBar('File')
         toolbar.addAction(newtab)
         toolbar.addAction(closeTab)
@@ -89,6 +128,13 @@ class MainWindow(QtGui.QMainWindow):
         toolbar.addAction(openTab)
         toolbar.addAction(saveTab)
         toolbar.addAction(saveAsTab)
+        toolbar.addSeparator()
+        toolbar.addAction(undoTab)
+        toolbar.addAction(redoTab)
+        toolbar.addAction(copyTab)
+        toolbar.addAction(pasteTab)
+        toolbar.addAction(cutTab)
+        toolbar.addAction(selectallTab)
 
         timer = QtCore.QTimer(self)
         QtCore.QObject.connect(timer, QtCore.SIGNAL("timeout()"), self.tabUpdate)
@@ -133,6 +179,24 @@ class MainWindow(QtGui.QMainWindow):
     def saveAs(self):
         self.Tabfile(self.mainTabWidget, "", 'saveAsFile')
 
+    def redo(self):
+        self.Tabfile(self.mainTabWidget, "", 'redoFile')
+
+    def undo(self):
+        self.Tabfile(self.mainTabWidget, "", 'undoFile')
+
+    def cut(self):
+        self.Tabfile(self.mainTabWidget, "", 'cutFile')
+
+    def selectAll(self):
+        self.Tabfile(self.mainTabWidget, "", 'selectAllFile')
+
+    def copy(self):
+        self.Tabfile(self.mainTabWidget, "", 'copyFile')
+
+    def paste(self):
+        self.Tabfile(self.mainTabWidget, "", 'pasteFile')
+
     def Tabfile(self, obj, indent, action_type):
         children=obj.children()
         if children==None:
@@ -150,6 +214,18 @@ class MainWindow(QtGui.QMainWindow):
                       child.save()
                    elif (action_type == 'saveAsFile'):
                       child.saveAs()
+                   elif (action_type == 'redoFile'):
+                      child.redo()
+                   elif (action_type == 'undoFile'):
+                      child.undo()
+                   elif (action_type == 'cutFile'):
+                      child.cut()
+                   elif (action_type == 'selectAllFile'):
+                      child.selectAll()
+                   elif (action_type == 'copyFile'):
+                      child.copy()
+                   elif (action_type == 'pasteFile'):
+                      child.paste()
                    elif (action_type == 'closeFile'):
                       self.test = child.closeEvent()
                       if debug==1:
@@ -160,23 +236,14 @@ class MainWindow(QtGui.QMainWindow):
                          self.setWindowTitle("PyTe v3")
                       else:
                          self.setWindowTitle(child.getTitle()+" - PyTe v3")
+                         self.mainTabWidget.setTabText(self.mainTabWidget.currentIndex(),child.getFile())
+                         self.mainTabWidget.setTabIcon(self.mainTabWidget.currentIndex(),QtGui.QIcon(self.icons+self.lexerPic[child.getFileType()]))
                    else:
                       pass
                 else:
                    pass
            else:
-                if (action_type == 'openFile'):
-                   self.Tabfile(child, indent + "  ", 'openFile')
-                elif (action_type == 'saveFile'):
-                   self.Tabfile(child, indent + "  ", 'saveFile')
-                elif (action_type == 'saveAsFile'):
-                   self.Tabfile(child, indent + "  ", 'saveAsFile')
-                elif (action_type == 'closeFile'):
-                   self.Tabfile(child, indent + "  ", 'closeFile')
-                elif (action_type == 'title'):
-                   self.Tabfile(child, indent + "  ", 'title')
-                else:
-                   pass
+                self.Tabfile(child, indent + "  ", action_type)
 
 #start the app
 if __name__ == "__main__":

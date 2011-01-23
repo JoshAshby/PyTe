@@ -41,7 +41,7 @@ class editor(QtGui.QWidget):
 
        #setup the lexer dictionary. This makes setting the lexer easy when a file is loaded
        self.lexer = {'.py': QsciLexerPython(), '.c': QsciLexerCPP(), '.rb': QsciLexerRuby(), '.sh': QsciLexerBash(), '': QsciLexerMakefile(), '.sql': QsciLexerSQL(), '.cpp': QsciLexerCPP(), '.h': QsciLexerCPP(), '.pl': QsciLexerPerl(),
-'.html': QsciLexerHTML,'.css': QsciLexerCSS,'.js': QsciLexerJavaScript,'.lua': QsciLexerLua,'.tex': QsciLexerTeX}
+'.html': QsciLexerHTML(),'.css': QsciLexerCSS(),'.js': QsciLexerJavaScript(),'.lua': QsciLexerLua(),'.tex': QsciLexerTeX(), '.txt': QsciLexerTeX()}
        self.editor.setLexer(self.lexer['.py'])
 
        fileBox = QtGui.QHBoxLayout()
@@ -87,6 +87,32 @@ class editor(QtGui.QWidget):
    def getTitle(self):
       return self.CurrentfileName
 
+   def getFile(self):
+      self.file =self.CurrentfileName.split('/')
+      return self.file[len(self.file)-1]
+
+   def getFileType(self):
+      self.extension = os.path.splitext(self.CurrentfileName)
+      return self.extension[len(self.extension)-1]
+
+   def redo(self):
+      self.editor.redo()
+
+   def undo(self):
+      self.editor.undo()
+
+   def cut(self):
+      self.editor.cut()
+
+   def copy(self):
+      self.editor.copy()
+
+   def paste(self):
+      self.editor.paste()
+
+   def selectAll(self):
+      self.editor.selectAll()
+
    def save(self):
       try:
           self.f = open(self.CurrentfileName,'w+r')
@@ -128,4 +154,3 @@ class editor(QtGui.QWidget):
               return 1
       else:
           return 1
-
