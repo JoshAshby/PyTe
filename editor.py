@@ -4,6 +4,7 @@ from PyQt4.QtCore import *
 from PyQt4 import QtCore, QtGui, Qsci
 from PyQt4.Qsci import QsciScintilla, QsciScintillaBase, QsciLexerPython, QsciLexerPerl, QsciLexerRuby, QsciLexerHTML, QsciLexerCSS, QsciLexerJavaScript, QsciLexerLua, QsciLexerPython, QsciLexerMakefile, QsciLexerCPP, QsciLexerBash, QsciLexerTeX, QsciLexerSQL, QsciLexerXML
 import ConfigParser
+import ast
 
 class editor(QtGui.QWidget):
    def __init__(self, parent, main):
@@ -20,7 +21,7 @@ class editor(QtGui.QWidget):
        self.setLayout(mainLayout)
 
        self.editor = QsciScintilla(self)
-
+       #parse the config file and grab all the stuff we need to configure some basics in scintilla
        self.config = ConfigParser.ConfigParser()
        self.configfile =  os.path.join(self.__Dir, 'config.cfg')
        self.config.read(self.configfile)
@@ -30,33 +31,42 @@ class editor(QtGui.QWidget):
        self.lncolor = self.config.get('Section1', 'lncol')
        self.mfcolor = self.config.get('Section1', 'mfcol')
        self.mbcolor = self.config.get('Section1', 'mbcol')
+       self.fontSize = ast.literal_eval(self.config.get('Section1', 'fontSize'))
+       self.fixedPitch = ast.literal_eval(self.config.get('Section1', 'fixedPitch'))
+       self.marginWidth = self.config.get('Section1', 'marginWidth')
+       self.autoIndent = ast.literal_eval(self.config.get('Section1', 'autoIndent'))
+       self.marginLine = ast.literal_eval(self.config.get('Section1', 'marginLineNumber'))
+       self.marginLineSec = ast.literal_eval(self.config.get('Section1', 'marginLineNumberSecond'))
+       self.setUf = ast.literal_eval(self.config.get('Section1', 'setUf8'))
+       self.carretLine = ast.literal_eval(self.config.get('Section1', 'carretLine'))
+       self.defaultLexer = self.config.get('Section1', 'defaultLexer')
 
+       #set all the basics for scintilla, should be pretty explanitory
        self.font = QtGui.QFont()
        self.font.setFamily(self.fontfam)
-       self.font.setFixedPitch(True)
-       self.font.setPointSize(10)
+       self.font.setFixedPitch(self.fixedPitch)
+       self.font.setPointSize(self.fontSize)
        self.fm = QtGui.QFontMetrics(self.font)
        self.editor.setFont(self.font)
        self.editor.setMarginsFont(self.font)
-       self.editor.setMarginWidth(0, self.fm.width( "0000" ))
+       self.editor.setMarginWidth(0, self.fm.width( self.marginWidth ))
        self.editor.setAutoCompletionSource(QsciScintilla.AcsAll)
-       self.editor.setAutoIndent(True)
-       self.editor.setMarginLineNumbers(0, True)
-       self.editor.setUtf8(True)
+       self.editor.setAutoIndent(self.autoIndent)
+       self.editor.setMarginLineNumbers(self.marginLine, self.marginLineSec)
+       self.editor.setUtf8(self.setUf)
        self.editor.setFolding(QsciScintilla.BoxedTreeFoldStyle)
        self.editor.setBraceMatching(QsciScintilla.SloppyBraceMatch)
-       self.editor.setCaretLineVisible(True)
+       self.editor.setCaretLineVisible(self.carretLine)
        self.editor.setCaretLineBackgroundColor(QtGui.QColor(self.ecolor))
        self.editor.setMarginsBackgroundColor(QtGui.QColor(self.mcolor))
        self.editor.setMarginsForegroundColor(QtGui.QColor(self.lncolor))
        self.editor.setFoldMarginColors(QtGui.QColor(self.mfcolor),QtGui.QColor(self.mbcolor))
 
        #setup the lexer dictionary. This makes setting the lexer easy when a file is loaded
-       self.lexer = {'.py': QsciLexerPython(), '.c': QsciLexerCPP(), '.rb': QsciLexerRuby(), '.sh': QsciLexerBash(), '': QsciLexerMakefile(), '.sql': QsciLexerSQL(), '.cpp': QsciLexerCPP(), '.h': QsciLexerCPP(), '.pl': QsciLexerPerl(),
-'.html': QsciLexerHTML(),'.css': QsciLexerCSS(),'.js': QsciLexerJavaScript(),'.lua': QsciLexerLua(),'.tex': QsciLexerTeX(), '.txt': QsciLexerTeX(), '.cfg': QsciLexerTeX(), '.php': QsciLexerHTML(), '.xml': QsciLexerXML()}
-       self.editor.setLexer(self.lexer['.py'])
+       self.lexer = {'.py': QsciLexerPython(), '.c': QsciLexerCPP(), '.rb': QsciLexerRuby(), '.sh': QsciLexerBash(), '': QsciLexerMakefile(), '.sql': QsciLexerSQL(), '.cpp': QsciLexerCPP(), '.h': QsciLexerCPP(), '.pl': QsciLexerPerl(),'.html': QsciLexerHTML(),'.css': QsciLexerCSS(),'.js': QsciLexerJavaScript(),'.lua': QsciLexerLua(),'.tex': QsciLexerTeX(), '.txt': QsciLexerTeX(), '.cfg': QsciLexerTeX(), '.php': QsciLexerHTML(), '.xml': QsciLexerXML()}
+       self.editor.setLexer(self.lexer[self.defaultLexer])
 
-       self.filetypes = '*.py *.c *.rb *.sh *.sql *.cpp *.h *.pl *.html *.css *.js *.lua *.tex *.txt *.cfg *.php *.xml'
+       self.filetypes = '*.py *.c *.rb *.sh *.sql *.cpp *.h *.pl *.html *.css *.js *.lua *.tex *.txt *.cfg *.php *.xml *'
 
        fileBox = QtGui.QHBoxLayout()
        mainLayout.addLayout(fileBox, 0)
@@ -66,7 +76,7 @@ class editor(QtGui.QWidget):
        self.CurrentfileName = ''
 
    def openFile(self):
-      self.fn = QtGui.QFileDialog.getOpenFileName(self, 'Open file',  os.getenv("HOME") , '')
+      self.fn = QtGui.QFileDialog.getOpenFileName(self, 'Open file',  os.getenv("HOME") , self.filetypes)
       if self.fn.isEmpty():
           return
       self.fileName = str(self.fn)
@@ -80,7 +90,7 @@ class editor(QtGui.QWidget):
       self.editor.setLexer(self.lexer[self.extension])
 
    def saveAs(self):
-      self.fn = QtGui.QFileDialog.getSaveFileName(self, 'Save File', os.getenv("HOME"), '')
+      self.fn = QtGui.QFileDialog.getSaveFileName(self, 'Save File', os.getenv("HOME"), self.filetypes)
       self.CurrentfileName = self.fn
       try:
           self.f = open(str(self.fn),'w+r')
