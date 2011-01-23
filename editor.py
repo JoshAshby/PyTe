@@ -120,13 +120,16 @@ class editor(QtGui.QWidget):
       self.editor.selectAll()
 
    def save(self):
-      try:
-          self.f = open(self.CurrentfileName,'w+r')
-      except:
-          return 0
-      self.f.write(str(self.editor.text()))
-      self.f.close()
-      return 1
+      if self.CurrentfileName=='':
+	      self.saveAs()
+      else:
+	      try:
+                   self.f = open(self.CurrentfileName,'w+r')
+              except:
+                   return 0
+              self.f.write(str(self.editor.text()))
+              self.f.close()
+              return 1
 
    def closeEvent(self):
       if (self.editor.isModified() == True):
