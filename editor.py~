@@ -119,7 +119,6 @@ class editor(QtGui.QWidget):
                      return 0
                  self.f.write(str(self.editor.text()))
                  self.f.close()
-                 return 1
           elif ret == QtGui.QMessageBox.Cancel:
               return 0
           elif ret == QtGui.QMessageBox.Discard:

@@ -9,12 +9,11 @@
 #All Trademarks Subject to their owners
 #Licensed under the Creative Commons v3 Non-Commercial License
 #===================================================
-#Ver .01 Alpha
+#Ver .5 Alpha
 #===================================================
 import sys, os
 from PyQt4.QtCore import *
-from PyQt4 import QtCore, QtGui, Qsci
-from PyQt4.Qsci import QsciScintilla, QsciScintillaBase, QsciLexerPython
+from PyQt4 import QtCore, QtGui
 from editor import editor
 
 debug = 0
@@ -41,18 +40,28 @@ class MainWindow(QtGui.QMainWindow):
 
         closeTab = QtGui.QAction(QtGui.QIcon(self.icons+'exit.png'), 'Close Tab', self)
         closeTab.setStatusTip('Close Tab')
+        closeTab.setWhatsThis("Close Tab: Closes the current tab.")
+        closeTab.setShortcut('CTRL+X')
         self.connect(closeTab, QtCore.SIGNAL('triggered()'), self.closetab)
 
+        quit = QtGui.QAction(QtGui.QIcon(self.icons+'exit.png'), 'Exit', self)
+        quit.setShortcut('Ctrl+Q')
+        quit.setStatusTip('Exit')
+        self.connect(quit, QtCore.SIGNAL('triggered()'), QtCore.SLOT('close()'))
+
         newtab = QtGui.QAction(QtGui.QIcon(self.icons+'add.png'), 'Add Tab', self)
-        newtab.setStatusTip('Add Tab')
+        newtab.setStatusTip('Add Code Tab')
+        newtab.setShortcut('CTRL+Z')
         self.connect(newtab,QtCore.SIGNAL('triggered()'), self.codetab)
 
         openTab = QtGui.QAction(QtGui.QIcon(self.icons+'open.png'), 'Open', self)
         openTab.setStatusTip('Open')
+        openTab.setShortcut('CTRL+O')
         self.connect(openTab,QtCore.SIGNAL('triggered()'), self.open)
 
         saveTab = QtGui.QAction(QtGui.QIcon(self.icons+'save.png'), 'Save', self)
-        saveTab.setStatusTip('save')
+        saveTab.setStatusTip('Save')
+        saveTab.setShortcut('CTRL+S')
         self.connect(saveTab,QtCore.SIGNAL('triggered()'), self.save)
 
         saveAsTab = QtGui.QAction(QtGui.QIcon(self.icons+'save.png'), 'Save As', self)
@@ -65,10 +74,13 @@ class MainWindow(QtGui.QMainWindow):
         menubar = self.menuBar()
         file = menubar.addMenu('&File')
         file.addAction(newtab)
+        file.addAction(closeTab)
+        file.addSeparator()
         file.addAction(openTab)
         file.addAction(saveTab)
         file.addAction(saveAsTab)
-        file.addAction(closeTab)
+        file.addSeparator()
+        file.addAction(quit)
 
         toolbar = self.addToolBar('File')
         toolbar.addAction(newtab)
@@ -86,45 +98,40 @@ class MainWindow(QtGui.QMainWindow):
         newEditor = editor(self, self)
         newTab = self.mainTabWidget.addTab(newEditor, QtGui.QIcon(self.icons+'pyte.png'), "Code Editor")
         self.mainTabWidget.setCurrentIndex(newTab)
-        self.getTitle(self.mainTabWidget, "")
+        self.Tabfile(self.mainTabWidget, "", 'title')
 
     def tabClose(self, tabIndex):
-        self.mainTabWidget.removeTab(tabIndex)
-        self.getTitle(self.mainTabWidget, "")
+        self.fileTest = self.Tabfile(self.mainTabWidget, "", 'closeFile')
+        if debug==1:
+           print self.fileTest
+        if self.fileTestSave==1:
+           self.mainTabWidget.removeTab(tabIndex)
+           self.Tabfile(self.mainTabWidget, "", 'title')
+
     def closetab(self):
-        self.mainTabWidget.removeTab(self.mainTabWidget.currentIndex())
-        self.getTitle(self.mainTabWidget, "")
+        self.fileTest = self.Tabfile(self.mainTabWidget, "", 'closeFile')
+        if debug==1:
+           print self.fileTest
+        if self.fileTestSave==1:
+           self.mainTabWidget.removeTab(self.mainTabWidget.currentIndex())
+           self.Tabfile(self.mainTabWidget, "", 'title')
 
     def tabChange(self, index):
-        self.getTitle(self.mainTabWidget, "")
+        self.Tabfile(self.mainTabWidget, "", 'title')
+
     def tabUpdate(self):
-        self.getTitle(self.mainTabWidget, "")
+        self.Tabfile(self.mainTabWidget, "", 'title')
         if debug==1:
            print self.windowTitle()
 
-    def getTitle(self, obj, indent):
-        children=obj.children()
-        if children==None:
-           return
-        for child in children:
-           if (child.__class__ == editor):
-                if debug==1:
-                   print child
-                if (child.getTitle() == ''):
-                   self.setWindowTitle("PyTe v3")
-                else:
-                   self.setWindowTitle(child.getTitle()+" - PyTe v3")
-           else:
-                self.getTitle(child, indent + "  ")
-
     def open(self):
-        self.Tabfile(self.mainTabWidget, "", openFile)
+        self.Tabfile(self.mainTabWidget, "", 'openFile')
 
     def save(self):
-        self.Tabfile(self.mainTabWidget, "", saveFile)
+        self.Tabfile(self.mainTabWidget, "", 'saveFile')
 
     def saveAs(self):
-        self.Tabfile(self.mainTabWidget, "", saveAsFile)
+        self.Tabfile(self.mainTabWidget, "", 'saveAsFile')
 
     def Tabfile(self, obj, indent, action_type):
         children=obj.children()
@@ -133,20 +140,43 @@ class MainWindow(QtGui.QMainWindow):
         for child in children:
            if (child.__class__ == editor):
                 if debug==1:
-                   print child
-                if (action_type == openFile):
-                   child.openFile()
-                elif (action_type == saveFile):
-                   child.save()
-                elif (action_type == saveAsFile):
-                   child.saveAs()
+                   print child, max(children), len(children), children[len(children)-1]
+                if (child == children[len(children)-1]):
+                   if debug==1:
+                      print child
+                   if (action_type == 'openFile'):
+                      child.openFile()
+                   elif (action_type == 'saveFile'):
+                      child.save()
+                   elif (action_type == 'saveAsFile'):
+                      child.saveAs()
+                   elif (action_type == 'closeFile'):
+                      self.test = child.closeEvent()
+                      if debug==1:
+                         print self.test
+                      self.fileTestSave = self.test
+                   elif (action_type == 'title'):
+                      if (child.getTitle() == ''):
+                         self.setWindowTitle("PyTe v3")
+                      else:
+                         self.setWindowTitle(child.getTitle()+" - PyTe v3")
+                   else:
+                      pass
+                else:
+                   pass
            else:
-                if (action_type == openFile):
-                   self.Tabfile(child, indent + "  ", openFile)
-                elif (action_type == saveFile):
-                   self.Tabfile(child, indent + "  ", saveFile)
-                elif (action_type == saveAsFile):
-                   self.Tabfile(child, indent + "  ", saveAsFile)
+                if (action_type == 'openFile'):
+                   self.Tabfile(child, indent + "  ", 'openFile')
+                elif (action_type == 'saveFile'):
+                   self.Tabfile(child, indent + "  ", 'saveFile')
+                elif (action_type == 'saveAsFile'):
+                   self.Tabfile(child, indent + "  ", 'saveAsFile')
+                elif (action_type == 'closeFile'):
+                   self.Tabfile(child, indent + "  ", 'closeFile')
+                elif (action_type == 'title'):
+                   self.Tabfile(child, indent + "  ", 'title')
+                else:
+                   pass
 
 #start the app
 if __name__ == "__main__":
