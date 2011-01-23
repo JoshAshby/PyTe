@@ -38,8 +38,6 @@ class editor(QtGui.QWidget):
        self.editor.setMarginsBackgroundColor(QtGui.QColor('#3e3e3e'))
        self.editor.setMarginsForegroundColor(QtGui.QColor('#aaff00'))
        self.editor.setFoldMarginColors(QtGui.QColor('#ff0000'),QtGui.QColor('#000000'))
-
-       #setup the lexer dictionary. This makes setting the lexer easy when a file is loaded
        self.lexer = {'.py': QsciLexerPython(), '.c': QsciLexerCPP(), '.rb': QsciLexerRuby(), '.sh': QsciLexerBash(), '': QsciLexerMakefile(), '.sql': QsciLexerSQL(), '.cpp': QsciLexerCPP(), '.h': QsciLexerCPP(), '.pl': QsciLexerPerl(),
 '.html': QsciLexerHTML,'.css': QsciLexerCSS,'.js': QsciLexerJavaScript,'.lua': QsciLexerLua,'.tex': QsciLexerTeX}
        self.editor.setLexer(self.lexer['.py'])
