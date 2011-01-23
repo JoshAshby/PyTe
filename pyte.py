@@ -27,7 +27,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle('PyTe v3')
         self.setWindowIcon(QtGui.QIcon(self.icons+'pyte.png'))
 
-        self.lexerPic = {'.py': 'python.png', '.c': 'c.png', '.rb': 'ruby.png', '.sh': 'bash.png', '': 'makefile.png', '.sql': 'sql.png', '.cpp': 'cpp.png', '.h': 'h.png', '.pl': 'perl.png','.html': 'html.png','.css': 'css.png','.js': 'javascript.png','.lua': 'lua.png','.tex': 'tex.png', '.cfg': 'tex.png', '.php': 'php.png'}
+        self.lexerPic = {'.py': 'python.png', '.c': 'c.png', '.rb': 'ruby.png', '.sh': 'bash.png', '': 'unknown.png', '.sql': 'sql.png', '.cpp': 'cpp.png', '.h': 'h.png', '.pl': 'perl.png','.html': 'html.png','.css': 'css.png','.js': 'javascript.png','.lua': 'lua.png','.tex': 'tex.png', '.cfg': 'tex.png', '.php': 'php.png', '.txt': 'text.png'}
 
         self.mainTabWidget = QtGui.QTabWidget(self)
         self.mainTabWidget.setTabsClosable(True)

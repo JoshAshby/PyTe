@@ -65,7 +65,7 @@ class editor(QtGui.QWidget):
        self.CurrentfileName = ''
 
    def openFile(self):
-      self.fn = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '')
+      self.fn = QtGui.QFileDialog.getOpenFileName(self, 'Open file', self.filetypes)
       if self.fn.isEmpty():
           return
       self.fileName = str(self.fn)
@@ -77,9 +77,16 @@ class editor(QtGui.QWidget):
       self.CurrentfileName = self.fileName
       self.extension = os.path.splitext(self.fileName)[1]
       self.editor.setLexer(self.lexer[self.extension])
+      
+   def openArg(self, FileName):
+      self.f = open(FileName,'r').read()
+      self.editor.setText(self.f)
+      self.CurrentfileName = FileName
+      self.extension = os.path.splitext(FileName)[1]
+      self.editor.setLexer(self.lexer[self.extension])
 
    def saveAs(self):
-      self.fn = QtGui.QFileDialog.getSaveFileName(self, 'Save File', '')
+      self.fn = QtGui.QFileDialog.getSaveFileName(self, 'Save File', '' , self.filetypes)
       self.CurrentfileName = self.fn
       try:
           self.f = open(str(self.fn),'w+r')

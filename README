@@ -1,20 +1,12 @@
-#====================About===========================
-#PyTe v3
-#Joshua Ashby
-#http://joshashby.com
-#joshuaashby@joshashby.com
-#2011
-#By Using PyTe you agree to the Python, and Qt License's
-#All Trademarks Subject to their owners
-#Licensed under the Creative Commons v3 Non-Commercial License
-#===================================================
-
-
-PyTe, which stands for Python Text Editor, is a semi advanced code editor that I have been writing over the past few years. I started writing it because I didn’t like the notepads and what not that where out there (plus I wanted a few more bragging rights). Since then PyTe has grown into a pretty complex project for myself.
-PyTe is written in PyQt4, and with the Python QScintilla2 bindings.
-
-Other:
-If you know of any open source icon packs that have all, or a lot of the different programming language mimetypes in an easy to recognize form, please send me a link and I may include them in PyTe.
+Please report bugs to: https://github.com/JoshAshby/PyTe/issues
 
 To use PyTe:
-Make sure you have the latest PyQT bindings, and the Python-scintilla bindings. Download the latest version, untar it (gui or with tar -xf) and run (again with the gui although you may have to set the permissions to “allow execution as program” or something similar (chmod 755 should work)) double click pyte.py or run in a terminal with working directory as the download and ./pyte.py or python pyte.py. Enjoy!
+Make sure you have the latest PyQT bindings, and the Python-scintilla bindings. Download the latest version, untar it (gui or with tar -xf) and run (again with the gui although you may have to set the permissions to 'allow execution as program' or something similar (chmod 755 should work)) double click pyte.py or run in a terminal with working directory as the download and ./pyte.py or python pyte.py. Enjoy!
+
+Licensing:
+PyTe is licensed under the Creative Commons Non-Commercial 3.0 license.
+
+Josh Ashby
+aka 'JoshAshby' (freenode)
+http://joshashby.com
+joshuaashby@joshashby.com
