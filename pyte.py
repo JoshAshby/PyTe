@@ -15,7 +15,7 @@ from PyQt4 import QtCore, QtGui
 from editor import editor
 
 debug = 0
-version = "1 Beta"
+version = "3 RC"
 
 class MainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
@@ -27,7 +27,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle('PyTe v3')
         self.setWindowIcon(QtGui.QIcon(self.icons+'pyte.png'))
 
-        self.lexerPic = {'.py': 'python.png', '.c': 'c.png', '.rb': 'ruby.png', '.sh': 'bash.png', ' ': 'unknown.png', '.sql': 'sql.png', '.cpp': 'cpp.png', '.h': 'h.png', '.pl': 'perl.png','.html': 'html.png','.css': 'css.png','.js': 'javascript.png','.lua': 'lua.png','.tex': 'tex.png', '.cfg': 'text.png', '.php': 'php.png', '.txt': 'text.png', '.xml': 'html.png'}
+        self.lexerPic = {'.py': 'python.png', '.json': 'javascript.png', '.c': 'c.png', '.rb': 'ruby.png', '.sh': 'bash.png', ' ': 'unknown.png', '.sql': 'sql.png', '.cpp': 'cpp.png', '.h': 'h.png', '.pl': 'perl.png','.html': 'html.png','.css': 'css.png','.js': 'javascript.png', '.coffee': 'javascript.png','.lua': 'lua.png','.tex': 'tex.png', '.cfg': 'text.png', '.php': 'php.png', '.txt': 'text.png', '.xml': 'html.png'}
 
         self.mainTabWidget = QtGui.QTabWidget(self)
         self.mainTabWidget.setTabsClosable(True)
@@ -206,7 +206,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def about(self):
         QtGui.QMessageBox.about(self,'PyTe v3',
-            'PyTe is a Source Code Editor, <br> He can open most common language files<br> and will auto set the lexer (syntax highlighing)<br> to fit the current file type. He can open unlimited files,<br> and each tab is full independent of it\'s neighbors<br> Version:'+version+'<br><a href="mailto:joshuaashby@joshashby.com">Josh Ashby</a><br><a href="http://joshashby.com">http://joshashby.com</a><br><a href="https://github.com/JoshAshby/PyTe">Source Code</a><br><a href="https://github.com/JoshAshby/PyTe/issues">Bug Reporting</a>')
+            'PyTe is a Source Code Editor, <br> He can open most common language files<br> and will auto set the lexer (syntax highlighing)<br> to fit the current file type. He can open unlimited files,<br> and each tab is full independent of its neighbors<br> Version:'+version+'<br><a href="mailto:joshuaashby@joshashby.com">Josh Ashby</a><br><a href="http://joshashby.com">http://joshashby.com</a><br><a href="https://github.com/JoshAshby/PyTe">Source Code</a><br><a href="https://github.com/JoshAshby/PyTe/issues">Bug Reporting</a>')
 
     def Tabfile(self, obj, indent, action_type):
         children=obj.children()

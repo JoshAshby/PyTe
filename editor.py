@@ -63,10 +63,10 @@ class editor(QtGui.QWidget):
        self.editor.setFoldMarginColors(QtGui.QColor(self.mfcolor),QtGui.QColor(self.mbcolor))
 
        #setup the lexer dictionary. This makes setting the lexer easy when a file is loaded
-       self.lexer = {'.py': QsciLexerPython(), '.c': QsciLexerCPP(), '.rb': QsciLexerRuby(), '.sh': QsciLexerBash(), '': QsciLexerMakefile(), '.sql': QsciLexerSQL(), '.cpp': QsciLexerCPP(), '.h': QsciLexerCPP(), '.pl': QsciLexerPerl(),'.html': QsciLexerHTML(),'.css': QsciLexerCSS(),'.js': QsciLexerJavaScript(),'.lua': QsciLexerLua(),'.tex': QsciLexerTeX(), '.txt': QsciLexerTeX(), '.cfg': QsciLexerTeX(), '.php': QsciLexerHTML(), '.xml': QsciLexerXML(), '.md':QsciLexerTeX(), '.pm':QsciLexerPerl()}
+       self.lexer = {'.py': QsciLexerPython(), '.json': QsciLexerJavaScript(), '.c': QsciLexerCPP(), '.rb': QsciLexerRuby(), '.sh': QsciLexerBash(), '': QsciLexerMakefile(), '.sql': QsciLexerSQL(), '.cpp': QsciLexerCPP(), '.h': QsciLexerCPP(), '.pl': QsciLexerPerl(),'.html': QsciLexerHTML(),'.css': QsciLexerCSS(), '.less': QsciLexerCSS() ,'.js': QsciLexerJavaScript(), '.coffee' : QsciLexerJavaScript(),'.lua': QsciLexerLua(),'.tex': QsciLexerTeX(), '.txt': QsciLexerTeX(), '.cfg': QsciLexerTeX(), '.php': QsciLexerHTML(), '.xml': QsciLexerXML(), '.md':QsciLexerTeX(), '.pm':QsciLexerPerl()}
        self.editor.setLexer(self.lexer[self.defaultLexer])
 
-       self.filetypes = '*.py *.c *.rb *.sh *.sql *.cpp *.h *.pl *.pm *.html *.css *.js *.lua *.tex *.txt *.md *.cfg *.php *.xml *'
+       self.filetypes = '*.py *.json *.c *.rb *.sh *.sql *.cpp *.h *.pl *.pm *.html *.css *.less *.js *.coffee *.lua *.tex *.txt *.md *.cfg *.php *.xml'
 
        fileBox = QtGui.QHBoxLayout()
        mainLayout.addLayout(fileBox, 0)
